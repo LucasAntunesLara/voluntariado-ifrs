@@ -1,30 +1,15 @@
 const express = require("express");
-
-const swaggerUi = require("swagger-ui-express");
-
-const specification = require("./config/swagger");
-
-const authRoutes = require("./routes/auth.routes");
-const eventsRoutes = require("./routes/events.routes");
-const volunteersRoutes = require("./routes/volunteers.routes");
+const cors = require("cors");
+const eventRoutes = require("./routes/eventRoutes");
+const authRoutes = require("./routes/authRoutes"); // Conforme implementado no login
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-app.get("/openapi.json", (req, res) => {
-  res.json(specification);
-});
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specification));
-
-app.use("/api/auth", authRoutes);
-app.use("/api/events", eventsRoutes);
-app.use("/api/volunteers", volunteersRoutes);
-
-app.use((req, res) => {
-  res.status(404).json({
-    message: "Endpoint não encontrado.",
-  });
-});
+// Registro das rotas da API
+// app.use("/auth", authRoutes);
+// app.use("/events", eventRoutes);
 
 module.exports = app;
