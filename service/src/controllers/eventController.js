@@ -19,6 +19,44 @@ class EventController {
       res.status(error.status || 500).json({ error: error.message });
     }
   }
+
+  static async getById(req, res) {
+    try {
+      const id = req.params.id;
+      res.json(pet);
+    } catch (error) {
+      res.status(error.status || 404).json({ error: error.message });
+    }
+  }
+
+  static async create(req, res) {
+    try {
+      const id = await EventService.create(req.body, req.user);
+      res.status(201).json({ message: "Evento criado com sucesso.", id });
+    } catch (error) {
+      res.status(error.status || 400).json({ error: error.message });
+    }
+  }
+
+  static async update(req, res) {
+    try {
+      const id = req.params.id;
+      await EventService.update(id, req.body, req.user);
+      res.json({ message: "Evento atualizado com sucesso." });
+    } catch (error) {
+      res.status(error.status || 400).json({ error: error.message });
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const id = req.params.id;
+      await EventService.delete(id, req.user);
+      res.json({ message: "Evento deletado com sucesso." });
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = EventController;
