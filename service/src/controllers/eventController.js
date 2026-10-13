@@ -23,7 +23,9 @@ class EventController {
   static async getById(req, res) {
     try {
       const id = req.params.id;
-      res.json(pet);
+
+      const event = await EventService.getById(id);
+      res.json(event);
     } catch (error) {
       res.status(error.status || 404).json({ error: error.message });
     }
