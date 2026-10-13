@@ -37,15 +37,8 @@ class EventService {
   static async delete(id) {
     const event = await EventModel.findById(id);
 
-    if (event && event.status === "adopted") {
-      const error = new Error(
-        "Não é permitido remover um event que já foi adotado.",
-      );
-      error.status = 400;
-      throw error;
-    }
-
     const deletedRows = await EventModel.delete(id);
+
     if (deletedRows === 0) {
       const error = new Error("Evento não encontrado.");
       error.status = 404;
