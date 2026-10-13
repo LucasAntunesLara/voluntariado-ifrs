@@ -2,7 +2,7 @@ const db = require("../config/database");
 
 class EventModel {
   static async create(data) {
-    const { name, age, species, size, description } = data;
+    const { title, description, location, date, max_volunteers } = data;
 
     const [result] = await db.query(
       "INSERT INTO events (title, description, location, date, max_volunteers) VALUES (?, ?, ?, ?, ?)",
@@ -29,7 +29,7 @@ class EventModel {
 
     const [result] = await db.query(
       "UPDATE events SET title = ?, description = ?, location = ?, date = ?, max_volunteers = ? WHERE id = ?",
-      [title, description, location, date, max_volunteers],
+      [title, description, location, date, max_volunteers, id],
     );
 
     return result.affectedRows;
