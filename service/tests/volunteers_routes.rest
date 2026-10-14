@@ -1,0 +1,46 @@
+### Variáveis de ambiente (opcional, se estiver usando a extensão REST Client no VS Code)
+@baseUrl = http://localhost:3000
+
+### 1. Listar todos os voluntários  [SUCESSO]
+GET {{baseUrl}}/volunteers
+
+### 2. Buscar voluntário por ID [SUCESSO]
+GET {{baseUrl}}/volunteers/1
+
+### 3. Criar um novo voluntário [SUCESSO]
+POST {{baseUrl}}/volunteers
+Content-Type: application/json
+
+{
+  "name":"Pickle Rick", 
+  "email":"piclerick@gmail.com",
+  "phone":"(54) 99933-1243",
+  "courseOrAffiliation":"Comunidade Externa"
+}
+
+### 4. Atualizar um voluntário existente [SUCESSO]
+PUT {{baseUrl}}/volunteers/1
+Content-Type: application/json
+
+{
+  "name":"Rick" 
+}
+
+### 5. Deletar um voluntário [SUCESSO]
+DELETE {{baseUrl}}/volunteers/4
+
+### 6. Criar voluntário com dados inválidos / faltando campos obrigatórios [ERRO 400]
+POST {{baseUrl}}/volunteers
+Content-Type: application/json
+
+{
+  "courseOrAffiliation": "Análise e Desenvolvimento de Sistemas"
+}
+
+### 7. Atualizar voluntário com ID inválido ou erro de validação [ERRO 400]
+PUT {{baseUrl}}/volunteers/id_invalido
+Content-Type: application/json
+
+{
+  "title": ""
+}
