@@ -1,0 +1,49 @@
+### Variáveis de ambiente (opcional, se estiver usando a extensão REST Client no VS Code)
+@baseUrl = http://localhost:3000
+
+### 1. Listar todos os eventos  [SUCESSO]
+GET {{baseUrl}}/events
+
+### 2. Buscar evento por ID [SUCESSO]
+GET {{baseUrl}}/events/1
+
+### 3. Criar um novo evento [SUCESSO]
+POST {{baseUrl}}/events
+Content-Type: application/json
+
+{
+  "title": "Conferência de Tecnologia 2026",
+  "description": "Um evento sobre as novas tendências de desenvolvimento.",
+  "location": "IFRS Campus Bento Gonçalves - Bloco B",
+  "date": "2026-11-15T10:00:00Z",
+  "max_volunteers": 50
+}
+
+### 4. Atualizar um evento existente [SUCESSO]
+PUT {{baseUrl}}/events/4
+Content-Type: application/json
+
+{
+  "title": "Conferência de Tecnologia 2026 - Atualizada",
+  "description": "Novos horários e palestrantes confirmados.",
+  "max_volunteers": 50
+}
+
+### 5. Deletar um evento [SUCESSO]
+DELETE {{baseUrl}}/events/4
+
+### 6. Criar evento com dados inválidos / faltando campos obrigatórios [ERRO 400]
+POST {{baseUrl}}/events
+Content-Type: application/json
+
+{
+  "description": "Faltando o título do evento"
+}
+
+### 7. Atualizar evento com ID inválido ou erro de validação [ERRO 400]
+PUT {{baseUrl}}/events/id_invalido
+Content-Type: application/json
+
+{
+  "title": ""
+}
