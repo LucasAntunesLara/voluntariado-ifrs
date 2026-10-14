@@ -133,13 +133,13 @@ INSERT INTO
 VALUES
     (
         'Rick Sanchez',
-        'ricksanchez@gamil.com',
+        'ricksanchez@gmail.com',
         '(54) 99911-2233',
         'Análise e Desenvolvimento de Sistemas'
     ),
     (
         'Morty Smith',
-        'mortysmith@gamil.com',
+        'mortysmith@gmail.com',
         '(54) 99822-3344',
         'Informática Para Internet'
     ),
@@ -151,7 +151,7 @@ VALUES
     ),
     (
         'Jerry Smith',
-        'jerrysmith@gamil.com',
+        'jerrysmith@gmail.com',
         '(54) 99644-5566',
         'Comunidade Externa'
     );
