@@ -37,7 +37,7 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/auth", authRoutes);
-app.use("/eventos", eventRoutes);
+app.use("/events", eventRoutes);
 
 app.get("/", (req, res) => {
   res.json({ status: "API rodando com sucesso!" });
