@@ -1,0 +1,160 @@
+/**
+ * @file volunteerRoutes.js
+ * @description Rotas para o gerenciamento de voluntários
+ */
+
+const { Router } = require("express");
+const VolunteerController = require("../controllers/volunteerController");
+
+const router = Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Volunteers
+ *   description: Gerenciamento de voluntários
+ */
+
+/**
+ * @swagger
+ * /volunteers:
+ *   get:
+ *     summary: Retorna a lista de todos os voluntários
+ *     tags: [Volunteers]
+ *     responses:
+ *       200:
+ *         description: Lista de voluntários retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+router.get("/", VolunteerController.getAll);
+
+/**
+ * @swagger
+ * /volunteers/{id}:
+ *   get:
+ *     summary: Retorna um voluntário pelo ID
+ *     tags: [Volunteers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do voluntário
+ *     responses:
+ *       200:
+ *         description: voluntário encontrado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: voluntário não encontrado.
+ */
+router.get("/:id", VolunteerController.getById);
+
+/**
+ * @swagger
+ * /volunteers:
+ *   post:
+ *     summary: Cria um novo voluntário
+ *     tags: [Volunteers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - title
+ *               properties:
+ *                 title:
+ *                   type: string
+ *                   description: Título do voluntário
+ *     responses:
+ *       201:
+ *         description: voluntário criado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 id:
+ *                   type: string
+ *       400:
+ *         description: Dados inválidos.
+ */
+router.post("/", VolunteerController.create);
+
+/**
+ * @swagger
+ * /volunteers/{id}:
+ *   put:
+ *     summary: Atualiza um voluntário existente
+ *     tags: [Volunteers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do voluntário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *     responses:
+ *       200:
+ *         description: voluntário atualizado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Dados inválidos ou erro na atualização.
+ */
+router.put("/:id", VolunteerController.update);
+
+/**
+ * @swagger
+ * /volunteers/{id}:
+ *   delete:
+ *     summary: Remove um voluntário pelo ID
+ *     tags: [Volunteers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do voluntário
+ *     responses:
+ *       200:
+ *         description: voluntário deletado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Erro interno ao deletar o voluntário.
+ */
+router.delete("/:id", VolunteerController.remove);
+
+module.exports = router;
