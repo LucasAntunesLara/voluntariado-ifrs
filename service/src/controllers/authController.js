@@ -25,7 +25,30 @@ class AuthController {
 
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(401).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * Retorna os dados do dashboard para o usuário autenticado.
+   * @param {Object} req - Requisição HTTP (contém dados decodificados do JWT via middleware).
+   * @param {Object} res - Resposta HTTP.
+   */
+  async getDashboard(req, res) {
+    try {
+      return res.status(200).json({
+        message: "Acesso autorizado ao painel.",
+        user: {
+          email: req.userEmail,
+          role: req.userRole,
+        },
+        summary: {
+          activeCampaigns: 3,
+          totalVolunteersRegistered: 4,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 }
