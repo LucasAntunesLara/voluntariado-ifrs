@@ -1,0 +1,197 @@
+@baseUrl = http://localhost:3000
+@adminToken = SEU_TOKEN_JWT_ADMIN_AQUI
+@userToken = SEU_TOKEN_JWT_USER_AQUI
+
+### ==========================================================
+### 1. AUTENTICAÇÃO (Auth)
+### ==========================================================
+
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br",
+  "password": "123456"
+}
+
+### Erro: Credenciais inválidas (senha incorreta)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br",
+  "password": "senhaerrada"
+}
+
+### Erro: Campos obrigatórios ausentes no login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br"
+}
+
+
+### ==========================================================
+### 2. ROTA PROTEGIDA / DASHBOARD
+### ==========================================================
+
+# Sucesso: Acesso com token válido
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{adminToken}}
+
+### Erro: Token ausente
+GET {{baseUrl}}/dashboard
+
+### Erro: Token inválido ou mal formatado
+GET {{baseUrl}}/dashboard
+Authorization: Bearer token_falso_invalido
+
+
+### ==========================================================
+### 3. EVENTOS (Events)
+### ==========================================================
+
+# Listar todos os eventos (Público)
+GET {{baseUrl}}/events
+
+### Sucesso: Cadastrar novo evento (Exclusivo Admin)
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Mutirão de Limpeza da Praia",
+  "description": "Ação comunitária de recolha de resíduos na orla.",
+  "location": "Orla da Lagoa",
+  "date": "2026-11-30 09:00:00",
+  "max_volunteers": 10
+}
+
+### Erro: Cadastrar evento sem privilégios de Admin (Usando role = user)
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "title": "Evento Proibido",
+  "description": "Teste sem permissão.",
+  "location": "Campus",
+  "date": "2026-12-01 10:00:00",
+  "max_volunteers": 5
+}
+
+### Erro: Dados obrigatórios ausentes no evento
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Evento Incompleto"
+}
+
+
+### ==========================================================
+### 4. VOLUNTÁRIOS (Volunteers)
+### ==========================================================
+
+# Listar todos os voluntários (Protegido)
+GET {{baseUrl}}/volunteers
+Authorization: Bearer {{adminToken}}
+
+### Sucesso: Cadastrar novo voluntário (Público ou logado)
+POST {{baseUrl}}/volunteers
+Content-Type: application/json
+
+{
+  "name": "Ana Beatriz Costa",
+  "email": "ana.costa@aluno.ifrs.edu.br",
+  "phone": "(54) 98877-6655",
+  "courseOrAffiliation": "Informática Biomédica"
+}
+
+### Erro: Cadastrar voluntário com e-mail duplicado
+POST {{baseUrl}}/volunteers
+Content-Type: application/json
+
+{
+  "name": "Outra Ana",
+  "email": "ana.costa@aluno.ifrs.edu.br",
+  "phone": "(54) 91122-3344",
+  "courseOrAffiliation": "Administração"
+}
+
+### Sucesso: Atualizar dados do voluntário (ID 1)
+PUT {{baseUrl}}/volunteers/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Carlos Eduardo da Silva Atualizado",
+  "email": "carlos.silva@aluno.ifrs.edu.br",
+  "phone": "(54) 99911-2233",
+  "courseOrAffiliation": "Análise e Desenvolvimento de Sistemas"
+}
+
+### Erro: Atualizar voluntário inexistente
+PUT {{baseUrl}}/volunteers/9999
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Não Existe",
+  "email": "nao@existe.com",
+  "phone": "(54) 00000-0000"
+}
+
+### Sucesso: Eliminar voluntário (ID 4)
+DELETE {{baseUrl}}/volunteers/4
+Authorization: Bearer {{adminToken}}
+
+### Erro: Eliminar voluntário inexistente
+DELETE {{baseUrl}}/volunteers/9999
+Authorization: Bearer {{adminToken}}
+
+
+### ==========================================================
+### 5. INSCRIÇÕES EM EVENTOS (Event-Volunteers)
+### ==========================================================
+
+# Listar voluntários inscritos em um evento (ID 1)
+GET {{baseUrl}}/events/1/volunteers
+
+### Sucesso: Inscrever voluntário (ID 3) em evento (ID 1)
+POST {{baseUrl}}/events/1/volunteers
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "volunteerId": 3
+}
+
+### Erro: Tentar inscrever o mesmo voluntário duas vezes no mesmo evento
+POST {{baseUrl}}/events/1/volunteers
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "volunteerId": 3
+}
+
+### Erro: Inscrever voluntário em evento inexistente
+POST {{baseUrl}}/events/9999/volunteers
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "volunteerId": 1
+}
+
+### Sucesso: Cancelar inscrição de voluntário (ID 3) no evento (ID 1)
+DELETE {{baseUrl}}/events/1/volunteers/3
+Authorization: Bearer {{adminToken}}
+
+### Erro: Cancelar inscrição que não existe
+DELETE {{baseUrl}}/events/1/volunteers/9999
+Authorization: Bearer {{adminToken}}
