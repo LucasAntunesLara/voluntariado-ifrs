@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@adminToken = SEU_TOKEN_JWT_ADMIN_AQUI
+@tokenAdmin = SEU_TOKEN_JWT_ADMIN_AQUI
 @userToken = SEU_TOKEN_JWT_USER_AQUI
 
 ### ==========================================================
@@ -14,6 +14,11 @@ Content-Type: application/json
   "email": "admin@ifrs.edu.br",
   "password": "123456"
 }
+
+###
+
+# ### Armazena o token do adotante
+@tokenAdmin = {{loginAdmin.response.body.token}}
 
 ### Erro: Credenciais inválidas (senha incorreta)
 POST {{baseUrl}}/auth/login
@@ -39,7 +44,7 @@ Content-Type: application/json
 
 # Sucesso: Acesso com token válido
 GET {{baseUrl}}/dashboard
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 ### Erro: Token ausente
 GET {{baseUrl}}/dashboard
@@ -59,7 +64,7 @@ GET {{baseUrl}}/events
 ### Sucesso: Cadastrar novo evento (Exclusivo Admin)
 POST {{baseUrl}}/events
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "title": "Mutirão de Limpeza da Praia",
@@ -85,7 +90,7 @@ Authorization: Bearer {{userToken}}
 ### Erro: Dados obrigatórios ausentes no evento
 POST {{baseUrl}}/events
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "title": "Evento Incompleto"
@@ -98,7 +103,7 @@ Authorization: Bearer {{adminToken}}
 
 # Listar todos os voluntários (Protegido)
 GET {{baseUrl}}/volunteers
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 ### Sucesso: Cadastrar novo voluntário (Público ou logado)
 POST {{baseUrl}}/volunteers
@@ -125,7 +130,7 @@ Content-Type: application/json
 ### Sucesso: Atualizar dados do voluntário (ID 1)
 PUT {{baseUrl}}/volunteers/1
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "name": "Carlos Eduardo da Silva Atualizado",
@@ -137,7 +142,7 @@ Authorization: Bearer {{adminToken}}
 ### Erro: Atualizar voluntário inexistente
 PUT {{baseUrl}}/volunteers/9999
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "name": "Não Existe",
@@ -147,11 +152,11 @@ Authorization: Bearer {{adminToken}}
 
 ### Sucesso: Eliminar voluntário (ID 4)
 DELETE {{baseUrl}}/volunteers/4
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 ### Erro: Eliminar voluntário inexistente
 DELETE {{baseUrl}}/volunteers/9999
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 
 ### ==========================================================
@@ -164,7 +169,7 @@ GET {{baseUrl}}/events/1/volunteers
 ### Sucesso: Inscrever voluntário (ID 3) em evento (ID 1)
 POST {{baseUrl}}/events/1/volunteers
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "volunteerId": 3
@@ -173,7 +178,7 @@ Authorization: Bearer {{adminToken}}
 ### Erro: Tentar inscrever o mesmo voluntário duas vezes no mesmo evento
 POST {{baseUrl}}/events/1/volunteers
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "volunteerId": 3
@@ -182,7 +187,7 @@ Authorization: Bearer {{adminToken}}
 ### Erro: Inscrever voluntário em evento inexistente
 POST {{baseUrl}}/events/9999/volunteers
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 {
   "volunteerId": 1
@@ -190,8 +195,8 @@ Authorization: Bearer {{adminToken}}
 
 ### Sucesso: Cancelar inscrição de voluntário (ID 3) no evento (ID 1)
 DELETE {{baseUrl}}/events/1/volunteers/3
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
 
 ### Erro: Cancelar inscrição que não existe
 DELETE {{baseUrl}}/events/1/volunteers/9999
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{tokenAdmin}}
