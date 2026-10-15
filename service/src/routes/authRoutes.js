@@ -1,8 +1,10 @@
 /**
  * @file authRoutes.js
- * @description Rotas de autenticação da API.
+ * @description Rotas para autenticação de usuários, geração de token JWT e rota protegida do dashboard.
  */
+
 const { Router } = require("express");
+const { verifyToken } = require("../middlewares/authMiddleware");
 const authController = require("../controllers/authController");
 
 const router = Router();
@@ -11,32 +13,41 @@ const router = Router();
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Realiza a autenticação do usuário
- *     tags: [Autenticação]
+ *     summary: Autentica um usuário e retorna o token JWT
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - email
- *               - password
  *             properties:
  *               email:
  *                 type: string
- *                 example: admin@ifrs.edu.br
  *               password:
  *                 type: string
- *                 example: "123456"
  *     responses:
  *       200:
- *         description: Autenticação realizada com sucesso. Retorna o token JWT.
- *       400:
- *         description: E-mail ou senha ausentes.
+ *         description: Login bem-sucedido com retorno do token.
  *       401:
  *         description: Credenciais inválidas.
  */
 router.post("/login", (req, res) => authController.login(req, res));
+
+/**
+ * @swagger
+ * /dashboard:
+ *   get:
+ *     summary: Rota protegida acessível apenas por usuários autenticados
+ *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Acesso autorizado ao painel.
+ *       401:
+ *         description: Token ausente ou inválido.
+ */
+router.get("/dashboard", verifyToken, authController.getDashboard);
 
 module.exports = router;
