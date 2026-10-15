@@ -8,15 +8,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, PlusCircle, LogOut } from "lucide-react";
+import {
+  Calendar,
+  PlusCircle,
+  LogOut,
+  PersonStanding,
+  ArrowRightIcon,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/useAuth";
 
 const Header = () => {
-  //Temporário
-  const user = {
-    name: "Rick Sanchez",
-    email: "ricksanchez@gmail.com",
-    role: "admin",
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -31,8 +40,15 @@ const Header = () => {
       <nav className="flex items-center gap-4">
         {user && (
           <>
-            <Button asChild variant="ghost" size="sm" className="gap-2">
-              <a href="/dashboard" className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="lg" className="gap-2">
+              <a href="/voluntarios" className="flex items-center gap-1">
+                <PersonStanding className="h-4 w-4" />
+                <span>Voluntários</span>
+              </a>
+            </Button>
+
+            <Button asChild variant="ghost" size="lg" className="gap-2">
+              <a href="/eventos" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>Eventos</span>
               </a>
@@ -41,10 +57,10 @@ const Header = () => {
             {user.role === "admin" && (
               <Button
                 asChild
-                size="sm"
+                size="lg"
                 className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white flex rounded-full"
               >
-                <a href="/events/new" className="flex items-center gap-1">
+                <a href="/eventos/novo" className="flex items-center gap-1">
                   <PlusCircle className="h-4 w-4" />
                   <span>Novo Evento</span>
                 </a>
@@ -54,8 +70,10 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger render={<Button variant="outline" />}>
                 <Avatar>
-                  <AvatarImage src="https://static.wikia.nocookie.net/liberproeliis/images/f/f4/Rick_Sanchez_C-137_dimension_preview.png/revision/latest?cb=20231022133205&path-prefix=pt-br" />
-                  <AvatarFallback>{user.name}</AvatarFallback>
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>
+                    {(user.name || user.email).slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <span className="max-w-30 truncate text-xs font-medium sm:max-w-none">
                   {user.email}
@@ -77,7 +95,7 @@ const Header = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem
-                    // onClick={handleLogout}
+                    onClick={handleLogout}
                     className="text-red-600 focus:bg-red-50 focus:text-red-600 cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
@@ -90,13 +108,22 @@ const Header = () => {
         )}
 
         {!user && (
-          <Button
-            asChild
-            size="sm"
-            className="bg-emerald-700 hover:bg-emerald-800"
-          >
-            <a to="/login">Entrar</a>
-          </Button>
+          <div className="flex gap-2 items-center">
+            <Button asChild size="lg" variant="ghost">
+              <Link to="/cadastro">Criar conta</Link>
+            </Button>
+
+            <Button
+              asChild
+              size="lg"
+              className="bg-emerald-700 hover:bg-emerald-800"
+            >
+              <Link to="/login" className="flex items-center gap-1">
+                Entrar
+                <ArrowRightIcon />
+              </Link>
+            </Button>
+          </div>
         )}
       </nav>
     </header>
