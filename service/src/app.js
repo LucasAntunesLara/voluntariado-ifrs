@@ -10,6 +10,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const volunteerRoutes = require("./routes/volunteerRoutes");
+const eventVolunteerRoutes = require("./routes/eventVolunteerRoutes");
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/auth", authRoutes);
 app.use("/events", eventRoutes);
+app.use("/events", eventVolunteerRoutes);
 app.use("/volunteers", volunteerRoutes);
 
 app.get("/", (req, res) => {
