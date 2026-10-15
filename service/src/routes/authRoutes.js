@@ -34,20 +34,4 @@ const router = Router();
  */
 router.post("/login", (req, res) => authController.login(req, res));
 
-/**
- * @swagger
- * /dashboard:
- *   get:
- *     summary: Rota protegida acessível apenas por usuários autenticados
- *     tags: [Auth]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Acesso autorizado ao painel.
- *       401:
- *         description: Token ausente ou inválido.
- */
-router.get("/dashboard", verifyToken, authController.getDashboard);
-
 module.exports = router;
