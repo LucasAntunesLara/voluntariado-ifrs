@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const volunteerRoutes = require("./routes/volunteerRoutes");
 const eventVolunteerRoutes = require("./routes/eventVolunteerRoutes");
+const dashboardRoute = require("./routes/dashboardRoute");
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/auth", authRoutes);
 app.use("/events", eventRoutes);
 app.use("/events", eventVolunteerRoutes);
 app.use("/volunteers", volunteerRoutes);
+app.use("/dashboard", dashboardRoute);
 
 app.get("/", (req, res) => {
   res.json({ status: "API rodando com sucesso!" });
