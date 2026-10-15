@@ -25,8 +25,7 @@ function verifyToken(req, res, next) {
     return res.status(401).json({ error: "Token mal formatado." });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err)
-      return res.status(403).json({ error: "Token inválido ou expirado." });
+    if (err) return res.sendStatus(403);
 
     req.user = decoded;
     return next();
@@ -34,18 +33,18 @@ function verifyToken(req, res, next) {
 }
 
 /**
- * Restringe o acesso apenas a usuários com o papel (role) de administrador.
+ * Restringe o acesso apenas a usuários com um papel (role) específico.
  */
-function requireAdmin(req, res, next) {
-  if (!req.user || req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ error: "Acesso negado. Requer privilégios de administrador." });
-  }
-  return next();
-}
+const authorizeRole = (role) => {
+  return (req, res, next) => {
+    if (req.user.role !== role)
+      return res.status(403).json({ message: "Acesso negado" });
+
+    next();
+  };
+};
 
 module.exports = {
   verifyToken,
-  requireAdmin,
+  authorizeRole,
 };
