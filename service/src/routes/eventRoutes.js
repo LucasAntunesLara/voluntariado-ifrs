@@ -5,6 +5,7 @@
 
 const { Router } = require("express");
 const EventController = require("../controllers/eventController");
+const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
 
 const router = Router();
 
@@ -93,7 +94,7 @@ router.get("/:id", EventController.getById);
  *       400:
  *         description: Dados inválidos.
  */
-router.post("/", EventController.create);
+router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
 
 /**
  * @swagger
