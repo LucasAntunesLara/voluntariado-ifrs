@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldDescription,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import api from "@/services/api";
@@ -57,7 +58,9 @@ export function LoginForm({ className, ...props }) {
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Bem-vindo de volta!</h1>
+                <h1 className="text-2xl font-bold text-brand-2">
+                  Bem-vindo de volta!
+                </h1>
                 <p className="text-balance text-muted-foreground">
                   Entre com a sua conta
                 </p>
@@ -112,9 +115,12 @@ export function LoginForm({ className, ...props }) {
                   className="bg-emerald-700 hover:bg-emerald-800"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Entrando..." : "Login"}
+                  {isSubmitting ? "Entrando..." : "Entrar"}
                 </Button>
               </Field>
+              <FieldDescription className="text-center">
+                Não tem uma conta? <Link to="/cadastro">Inscrever-se</Link>
+              </FieldDescription>
             </FieldGroup>
           </form>
           <div className="relative hidden bg-muted md:block">
