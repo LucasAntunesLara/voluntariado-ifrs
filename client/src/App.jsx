@@ -5,12 +5,16 @@ import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import EventsList from "./pages/events";
 import CreateEvent from "./pages/events/create";
+import Dashboard from "./pages/dashboard";
+import { useAuth } from "./contexts/useAuth";
 
 function App() {
+  const { user } = useAuth();
+
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Header />,
+      element: user ? <Dashboard /> : <Header />,
     },
     {
       path: "/login",
@@ -31,6 +35,10 @@ function App() {
     {
       path: "/eventos/:id/editar",
       element: <CreateEvent />,
+    },
+    {
+      path: "/dashboard",
+      element: <Dashboard />,
     },
   ]);
 
