@@ -1,11 +1,16 @@
 import "./App.css";
 import Header from "./components/layout/header";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import EventsList from "./pages/events";
 import CreateEvent from "./pages/events/create";
 import Dashboard from "./pages/dashboard";
+import Profile from "./pages/profile";
 import { useAuth } from "./contexts/useAuth";
 
 function App() {
@@ -39,6 +44,10 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/perfil",
+      element: user ? <Profile /> : <Navigate to="/login" replace />,
     },
   ]);
 

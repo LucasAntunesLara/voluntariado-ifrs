@@ -17,6 +17,57 @@ class UserModel {
     return rows[0] || null;
   }
 
+  async findProfileById(id) {
+    const [rows] = await db.execute(
+      `SELECT u.id, u.name, u.email, u.role, u.created_at AS createdAt
+       FROM users u
+       WHERE u.id = ?`,
+      [id],
+    );
+    return rows[0] || null;
+  }
+
+  async updateProfile(id, { name, email }) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const [users] = await connection.execute(
+        "SELECT id, role FROM users WHERE id = ? FOR UPDATE",
+        [id],
+      );
+      if (!users[0]) {
+        const error = new Error("Conta não encontrada.");
+        error.status = 404;
+        throw error;
+      }
+
+      await connection.execute(
+        "UPDATE users SET name = ?, email = ? WHERE id = ?",
+        [name, email, id],
+      );
+
+      if (users[0].role === "volunteer") {
+        await connection.execute(
+          "UPDATE volunteers SET name = ?, email = ? WHERE user_id = ?",
+          [name, email, id],
+        );
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async deleteAccount(id) {
+    const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
+    return result.affectedRows > 0;
+  }
+
   async createVolunteer({ name, email, password }) {
     const connection = await db.getConnection();
     try {

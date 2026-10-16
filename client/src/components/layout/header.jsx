@@ -82,7 +82,9 @@ const Header = () => {
               <DropdownMenuContent>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
-                  <DropdownMenuItem>Perfil</DropdownMenuItem>
+                  <DropdownMenuItem render={<Link to="/perfil" />}>
+                    Perfil
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <p className="text-xs text-muted-foreground capitalize">
                       Permissão:{" "}

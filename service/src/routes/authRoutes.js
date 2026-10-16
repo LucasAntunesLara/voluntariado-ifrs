@@ -69,4 +69,14 @@ router.post("/login", (req, res) => authController.login(req, res));
  */
 router.post("/register", (req, res) => authController.register(req, res));
 
+router.get("/me", verifyToken, (req, res) =>
+  authController.getProfile(req, res),
+);
+router.patch("/me", verifyToken, (req, res) =>
+  authController.updateProfile(req, res),
+);
+router.delete("/me", verifyToken, (req, res) =>
+  authController.deleteAccount(req, res),
+);
+
 module.exports = router;
