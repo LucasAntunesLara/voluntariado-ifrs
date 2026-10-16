@@ -31,7 +31,7 @@ CREATE TABLE
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        role ENUM ('admin', 'user') NOT NULL DEFAULT 'user',
+        role ENUM ('admin', 'volunteer') NOT NULL DEFAULT 'volunteer',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -57,9 +57,11 @@ CREATE TABLE
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
-        phone VARCHAR(20) NOT NULL,
+        user_id INT NULL UNIQUE,
+        phone VARCHAR(20) NULL,
         course_or_affiliation VARCHAR(100) DEFAULT 'Comunidade Externa',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
 
 -- ------------------------------------------------------------
@@ -69,11 +71,25 @@ CREATE TABLE
     event_volunteers (
         id INT AUTO_INCREMENT PRIMARY KEY,
         event_id INT NOT NULL,
-        volunteer_id INT NOT NULL,
+        volunteer_id INT NULL,
+        user_id INT NULL,
+        status ENUM ('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
         registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
         FOREIGN KEY (volunteer_id) REFERENCES volunteers (id) ON DELETE CASCADE,
-        UNIQUE KEY unique_event_volunteer (event_id, volunteer_id)
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        UNIQUE KEY unique_event_volunteer (event_id, volunteer_id),
+        UNIQUE KEY unique_event_user (event_id, user_id),
+        CONSTRAINT chk_event_volunteer_identity CHECK (
+            (
+                volunteer_id IS NOT NULL
+                AND user_id IS NULL
+            )
+            OR (
+                volunteer_id IS NULL
+                AND user_id IS NOT NULL
+            )
+        )
     );
 
 -- ============================================================
@@ -87,14 +103,14 @@ VALUES
     (
         'Admin',
         'admin@ifrs.edu.br',
-        '$2a$10$7R0Z4E/yZ31N4mKxP0Qz/.hHw8P1C83fSg9X/f23aF0wJ1Q/x4Gey',
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
         'admin'
     ),
     (
         'User 1',
         'user1@gmail.com',
-        '$2a$10$7R0Z4E/yZ31N4mKxP0Qz/.hHw8P1C83fSg9X/f23aF0wJ1Q/x4Gey',
-        'user'
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
+        'volunteer'
     );
 
 INSERT INTO
@@ -155,6 +171,17 @@ VALUES
         '(54) 99644-5566',
         'Comunidade Externa'
     );
+
+INSERT INTO
+    volunteers (name, email, user_id)
+SELECT
+    name,
+    email,
+    id
+FROM
+    users
+WHERE
+    email = 'user1@gmail.com';
 
 INSERT INTO
     event_volunteers (event_id, volunteer_id)

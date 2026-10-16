@@ -17,20 +17,57 @@ class UserModel {
     return rows[0] || null;
   }
 
-  /**
-   * Cria um novo usuário no banco de dados.
-   * @param {Object} userData - Dados do usuário.
-   * @param {string} userData.name - Nome completo.
-   * @param {string} userData.email - E-mail.
-   * @param {string} userData.password - Senha criptografada (hash).
-   * @param {string} userData.role - Papel do usuário ('admin' ou 'user').
-   * @returns {Promise<Object>} Objeto com o ID inserido.
-   */
-  async create({ name, email, password, role = "user" }) {
-    const query =
-      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
-    const [result] = await db.execute(query, [name, email, password, role]);
-    return { id: result.insertId, name, email, role };
+  async createVolunteer({ name, email, password }) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [userResult] = await connection.execute(
+        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'volunteer')",
+        [name, email, password],
+      );
+      const [existingVolunteers] = await connection.execute(
+        "SELECT id, user_id FROM volunteers WHERE email = ? FOR UPDATE",
+        [email],
+      );
+      if (existingVolunteers[0]) {
+        if (existingVolunteers[0].user_id) {
+          const error = new Error(
+            "Este e-mail já está associado a um cadastro de voluntário.",
+          );
+          error.status = 409;
+          throw error;
+        }
+        await connection.execute(
+          "UPDATE volunteers SET user_id = ? WHERE id = ?",
+          [userResult.insertId, existingVolunteers[0].id],
+        );
+      } else {
+        await connection.execute(
+          "INSERT INTO volunteers (name, email, user_id) VALUES (?, ?, ?)",
+          [name, email, userResult.insertId],
+        );
+      }
+      await connection.commit();
+      return {
+        id: userResult.insertId,
+        name,
+        email,
+        role: "volunteer",
+      };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async createAdmin({ name, email, password }) {
+    const [result] = await db.execute(
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin')",
+      [name, email, password],
+    );
+    return { id: result.insertId, name, email, role: "admin" };
   }
 }
 
