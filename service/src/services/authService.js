@@ -62,6 +62,66 @@ class AuthService {
     return this.createSession(user);
   }
 
+  async getProfile(id) {
+    const user = await userModel.findProfileById(id);
+    if (!user) {
+      const error = new Error("Conta não encontrada.");
+      error.status = 404;
+      throw error;
+    }
+    return user;
+  }
+
+  async updateProfile(id, { name, email }) {
+    const normalizedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!normalizedName || !normalizedEmail) {
+      const error = new Error("Nome e e-mail são obrigatórios.");
+      error.status = 400;
+      throw error;
+    }
+    if (normalizedName.length > 100 || normalizedEmail.length > 100) {
+      const error = new Error(
+        "Nome e e-mail devem ter no máximo 100 caracteres.",
+      );
+      error.status = 400;
+      throw error;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      const error = new Error("Informe um e-mail válido.");
+      error.status = 400;
+      throw error;
+    }
+
+    try {
+      await userModel.updateProfile(id, {
+        name: normalizedName,
+        email: normalizedEmail,
+      });
+    } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        const conflictError = new Error(
+          "Já existe uma conta ou cadastro de voluntário com este e-mail.",
+        );
+        conflictError.status = 409;
+        throw conflictError;
+      }
+      throw error;
+    }
+
+    return this.getProfile(id);
+  }
+
+  async deleteAccount(id) {
+    const deleted = await userModel.deleteAccount(id);
+    if (!deleted) {
+      const error = new Error("Conta não encontrada.");
+      error.status = 404;
+      throw error;
+    }
+  }
+
   /**
    * Registra um novo usuário no sistema.
    *

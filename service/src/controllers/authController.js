@@ -57,6 +57,33 @@ class AuthController {
     }
   }
 
+  async getProfile(req, res) {
+    try {
+      const profile = await authService.getProfile(req.user.id);
+      return res.status(200).json(profile);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  async updateProfile(req, res) {
+    try {
+      const profile = await authService.updateProfile(req.user.id, req.body);
+      return res.status(200).json(profile);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  async deleteAccount(req, res) {
+    try {
+      await authService.deleteAccount(req.user.id);
+      return res.sendStatus(204);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
   async createAdmin(req, res) {
     try {
       const { name, email, password } = req.body;

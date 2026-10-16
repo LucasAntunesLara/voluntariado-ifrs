@@ -33,6 +33,10 @@ export function AuthProvider({ children }) {
         setToken(newToken);
         setUser(authenticatedUser || null);
       },
+      updateUser: (updatedUser) => {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      },
       logout: () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
