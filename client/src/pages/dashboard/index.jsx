@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import api from "@/services/api";
 import { useAuth } from "@/contexts/useAuth";
 
@@ -18,6 +19,12 @@ export default function Dashboard() {
   const [busyRequest, setBusyRequest] = useState(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminFormError, setAdminFormError] = useState("");
+  const [adminFormNotice, setAdminFormNotice] = useState("");
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
 
   const loadRequests = useCallback(async (endpoint) => {
     setError("");
@@ -81,6 +88,32 @@ export default function Dashboard() {
       );
     } finally {
       setBusyRequest(null);
+    }
+  };
+
+  const createAdmin = async (event) => {
+    event.preventDefault();
+    setIsCreatingAdmin(true);
+    setAdminFormError("");
+    setAdminFormNotice("");
+
+    try {
+      const { data } = await api.post("/dashboard/admins", {
+        name: adminName,
+        email: adminEmail,
+        password: adminPassword,
+      });
+      setAdminFormNotice(`Administrador ${data.name} criado com sucesso.`);
+      setAdminName("");
+      setAdminEmail("");
+      setAdminPassword("");
+    } catch (createError) {
+      setAdminFormError(
+        createError?.response?.data?.error ||
+          "Não foi possível adicionar o administrador.",
+      );
+    } finally {
+      setIsCreatingAdmin(false);
     }
   };
 
@@ -170,6 +203,70 @@ export default function Dashboard() {
             )
           ) : (
             <>
+              <section className="mb-6 rounded-lg border bg-white p-6 shadow-sm">
+                <h2 className="mb-2 text-xl font-semibold text-gray-900">
+                  Adicionar administrador
+                </h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Crie uma conta com acesso administrativo ao sistema.
+                </p>
+                <form className="grid gap-4 md:grid-cols-2" onSubmit={createAdmin}>
+                  <label className="grid gap-1 text-sm font-medium text-gray-700">
+                    Nome
+                    <Input
+                      type="text"
+                      autoComplete="name"
+                      maxLength={100}
+                      required
+                      value={adminName}
+                      onChange={(event) => setAdminName(event.target.value)}
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm font-medium text-gray-700">
+                    E-mail
+                    <Input
+                      type="email"
+                      autoComplete="email"
+                      maxLength={100}
+                      required
+                      value={adminEmail}
+                      onChange={(event) => setAdminEmail(event.target.value)}
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm font-medium text-gray-700">
+                    Senha inicial
+                    <Input
+                      type="password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      required
+                      value={adminPassword}
+                      onChange={(event) => setAdminPassword(event.target.value)}
+                    />
+                  </label>
+                  <div className="flex items-end">
+                    <Button
+                      type="submit"
+                      disabled={isCreatingAdmin}
+                      className="bg-emerald-700 text-white hover:bg-emerald-800"
+                    >
+                      {isCreatingAdmin
+                        ? "Adicionando..."
+                        : "Adicionar administrador"}
+                    </Button>
+                  </div>
+                </form>
+                {adminFormError && (
+                  <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+                    {adminFormError}
+                  </p>
+                )}
+                {adminFormNotice && (
+                  <p className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800" role="status">
+                    {adminFormNotice}
+                  </p>
+                )}
+              </section>
               {notice && (
                 <p className="mb-4 rounded-lg bg-emerald-50 p-4 text-emerald-800">
                   {notice}
