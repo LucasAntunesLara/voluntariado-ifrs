@@ -35,9 +35,9 @@ function verifyToken(req, res, next) {
 /**
  * Restringe o acesso apenas a usuários com um papel (role) específico.
  */
-const authorizeRole = (role) => {
+const authorizeRole = (...roles) => {
   return (req, res, next) => {
-    if (req.user.role !== role)
+    if (!roles.includes(req.user.role))
       return res.status(403).json({ message: "Acesso negado" });
 
     next();

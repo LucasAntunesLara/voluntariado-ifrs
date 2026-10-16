@@ -15,7 +15,7 @@ class AuthService {
    * @param {number|string} user.id - Identificador único do usuário.
    * @param {string} user.name - Nome do usuário.
    * @param {string} user.email - E-mail do usuário.
-   * @param {string} user.role - Papel/perfil do usuário (ex.: "admin", "user").
+   * @param {string} user.role - Papel/perfil do usuário.
    * @returns {{ token: string, user: { id: number|string, name: string, email: string, role: string } }}
    * Objeto contendo o token JWT (validade de 8 horas) e os dados básicos do usuário.
    */
@@ -46,10 +46,18 @@ class AuthService {
    */
   async authenticate(email, password) {
     const user = await userModel.findByEmail(email);
-    if (!user) throw new Error("Credenciais inválidas.");
+    if (!user) {
+      const error = new Error("Credenciais inválidas.");
+      error.status = 401;
+      throw error;
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new Error("Credenciais inválidas.");
+    if (!isPasswordValid) {
+      const error = new Error("Credenciais inválidas.");
+      error.status = 401;
+      throw error;
+    }
 
     return this.createSession(user);
   }
@@ -83,7 +91,7 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-      const user = await userModel.create({
+      const user = await userModel.createVolunteer({
         name: name.trim(),
         email: normalizedEmail,
         password: hashedPassword,
@@ -97,6 +105,31 @@ class AuthService {
         throw conflictError;
       }
 
+      throw error;
+    }
+  }
+
+  async createAdmin(name, email, password) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (await userModel.findByEmail(normalizedEmail)) {
+      const error = new Error("Já existe uma conta com este e-mail.");
+      error.status = 409;
+      throw error;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+      return await userModel.createAdmin({
+        name: name.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+      });
+    } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        const conflictError = new Error("Já existe uma conta com este e-mail.");
+        conflictError.status = 409;
+        throw conflictError;
+      }
       throw error;
     }
   }

@@ -5,51 +5,37 @@
 
 const eventVolunteerModel = require("../models/eventVolunteerModel");
 const eventModel = require("../models/eventModel");
-const volunteerModel = require("../models/volunteerModel");
 
 class EventVolunteerService {
-  /**
-   * Realiza a inscrição de um voluntário em um evento com validações de negócio.
-   * @param {number} eventId - ID do evento.
-   * @param {number} volunteerId - ID do voluntário.
-   * @returns {Promise<Object>} Dados da inscrição.
-   * @throws {Error} Se o evento estiver cheio, não existir ou se já estiver inscrito.
-   */
-  async registerVolunteer(eventId, volunteerId) {
-    const event = await eventModel.findById(eventId);
-    if (!event) {
-      throw new Error("Evento não encontrado.");
+  async requestParticipation(eventId, userId) {
+    return await eventVolunteerModel.createRequest(eventId, userId);
+  }
+
+  async reviewRequest(requestId, decision) {
+    if (!["approved", "rejected"].includes(decision)) {
+      const error = new Error("A decisão deve ser 'approved' ou 'rejected'.");
+      error.status = 400;
+      throw error;
     }
 
-    const volunteer = await volunteerModel.findById(volunteerId);
-    if (!volunteer) {
-      throw new Error("Voluntário não encontrado.");
-    }
-
-    const existingRegistration =
-      await eventVolunteerModel.findByEventAndVolunteer(eventId, volunteerId);
-    if (existingRegistration) {
-      throw new Error("O voluntário já se encontra inscrito neste evento.");
-    }
-
-    const currentCount = await eventVolunteerModel.countByEvent(eventId);
-    if (currentCount >= event.max_volunteers) {
-      throw new Error(
-        "O limite máximo de voluntários para este evento já foi atingido.",
+    const result = await eventVolunteerModel.reviewRequest(requestId, decision);
+    if (result.capacityRejected) {
+      const error = new Error(
+        "As vagas foram preenchidas. A solicitação foi recusada automaticamente.",
       );
+      error.status = 409;
+      error.request = result;
+      throw error;
     }
+    return result;
+  }
 
-    const registrationId = await eventVolunteerModel.create(
-      eventId,
-      volunteerId,
-    );
+  async getRequestsForAdmin() {
+    return await eventVolunteerModel.findRequestsForAdmin();
+  }
 
-    return {
-      id: registrationId,
-      eventId,
-      volunteerId,
-      message: "Voluntário inscrito com sucesso no evento.",
-    };
+  async getRequestsByUser(userId) {
+    return await eventVolunteerModel.findRequestsByUser(userId);
   }
 
   /**

@@ -5,7 +5,10 @@
 
 const { Router } = require("express");
 const eventVolunteerController = require("../controllers/eventVolunteerController");
-const { verifyToken } = require("../middlewares/authMiddleware");
+const {
+  verifyToken,
+  authorizeRole,
+} = require("../middlewares/authMiddleware");
 
 const router = Router();
 
@@ -33,6 +36,7 @@ router.get(
 router.post(
   "/:eventId/volunteers",
   verifyToken,
+  authorizeRole("volunteer"),
   eventVolunteerController.register,
 );
 
@@ -48,6 +52,7 @@ router.post(
 router.delete(
   "/:eventId/volunteers/:volunteerId",
   verifyToken,
+  authorizeRole("admin"),
   eventVolunteerController.unregister,
 );
 

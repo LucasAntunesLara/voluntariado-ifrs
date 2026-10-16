@@ -14,21 +14,13 @@ class EventVolunteerController {
   async register(req, res) {
     try {
       const { eventId } = req.params;
-      const { volunteerId } = req.body;
-
-      if (!volunteerId) {
-        return res
-          .status(400)
-          .json({ error: "O ID do voluntário é obrigatório." });
-      }
-
-      const result = await eventVolunteerService.registerVolunteer(
+      const result = await eventVolunteerService.requestParticipation(
         Number(eventId),
-        Number(volunteerId),
+        Number(req.user.id),
       );
       return res.status(201).json(result);
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
     }
   }
 
@@ -64,6 +56,42 @@ class EventVolunteerController {
       return res.status(200).json(volunteers);
     } catch (error) {
       return res.status(404).json({ error: error.message });
+    }
+  }
+
+  async listAdminRequests(req, res) {
+    try {
+      const requests = await eventVolunteerService.getRequestsForAdmin();
+      return res.status(200).json(requests);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async listMyRequests(req, res) {
+    try {
+      const requests = await eventVolunteerService.getRequestsByUser(
+        Number(req.user.id),
+      );
+      return res.status(200).json(requests);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async reviewRequest(req, res) {
+    try {
+      const { status } = req.body;
+      const result = await eventVolunteerService.reviewRequest(
+        Number(req.params.requestId),
+        status,
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        error: error.message,
+        request: error.request,
+      });
     }
   }
 }

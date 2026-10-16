@@ -4,7 +4,11 @@
  */
 
 const { Router } = require("express");
-const { verifyToken } = require("../middlewares/authMiddleware");
+const {
+  verifyToken,
+  authorizeRole,
+} = require("../middlewares/authMiddleware");
+const eventVolunteerController = require("../controllers/eventVolunteerController");
 const authController = require("../controllers/authController");
 
 const router = Router();
@@ -24,5 +28,28 @@ const router = Router();
  *         description: Token ausente ou inválido.
  */
 router.get("/", verifyToken, authController.getDashboard);
+router.post(
+  "/admins",
+  verifyToken,
+  authorizeRole("admin"),
+  authController.createAdmin,
+);
+router.get(
+  "/participation-requests",
+  verifyToken,
+  authorizeRole("admin"),
+  eventVolunteerController.listAdminRequests,
+);
+router.get(
+  "/my-participation-requests",
+  verifyToken,
+  eventVolunteerController.listMyRequests,
+);
+router.patch(
+  "/participation-requests/:requestId",
+  verifyToken,
+  authorizeRole("admin"),
+  eventVolunteerController.reviewRequest,
+);
 
 module.exports = router;

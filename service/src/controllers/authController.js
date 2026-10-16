@@ -57,6 +57,30 @@ class AuthController {
     }
   }
 
+  async createAdmin(req, res) {
+    try {
+      const { name, email, password } = req.body;
+      if (!name?.trim() || !email?.trim() || !password) {
+        return res
+          .status(400)
+          .json({ error: "Nome, e-mail e senha são obrigatórios." });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        return res.status(400).json({ error: "Informe um e-mail válido." });
+      }
+      if (password.length < 8) {
+        return res
+          .status(400)
+          .json({ error: "A senha deve ter pelo menos 8 caracteres." });
+      }
+
+      const admin = await authService.createAdmin(name, email, password);
+      return res.status(201).json(admin);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
   /**
    * Retorna os dados do dashboard para o usuário autenticado.
    * @param {Object} req - Requisição HTTP (contém dados decodificados do JWT via middleware).
@@ -67,8 +91,8 @@ class AuthController {
       return res.status(200).json({
         message: "Acesso autorizado ao painel.",
         user: {
-          email: req.userEmail,
-          role: req.userRole,
+          email: req.user.email,
+          role: req.user.role,
         },
         summary: {
           activeCampaigns: 3,

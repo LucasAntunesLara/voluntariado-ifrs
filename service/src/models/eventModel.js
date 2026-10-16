@@ -19,7 +19,13 @@ class EventModel {
   }
 
   static async findAll() {
-    const [rows] = await db.query("SELECT * FROM events");
+    const [rows] = await db.query(
+      `SELECT e.*,
+              (SELECT COUNT(*) FROM event_volunteers ev
+               WHERE ev.event_id = e.id AND ev.status = 'approved') AS volunteers_count
+       FROM events e
+       ORDER BY e.date ASC`,
+    );
 
     return rows;
   }
