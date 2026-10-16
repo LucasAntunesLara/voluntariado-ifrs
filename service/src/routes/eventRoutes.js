@@ -100,8 +100,10 @@ router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
  * @swagger
  * /events/{id}:
  *   put:
- *     summary: Atualiza um evento existente
+ *     summary: Atualiza um evento existente (apenas administradores)
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -127,15 +129,28 @@ router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
  *                   type: string
  *       400:
  *         description: Dados inválidos ou erro na atualização.
+ *       401:
+ *         description: Token de autenticação não fornecido.
+ *       403:
+ *         description: Acesso negado ou token inválido.
+ *       404:
+ *         description: Evento não encontrado.
  */
-router.put("/:id", EventController.update);
+router.put(
+  "/:id",
+  verifyToken,
+  authorizeRole("admin"),
+  EventController.update,
+);
 
 /**
  * @swagger
  * /events/{id}:
  *   delete:
- *     summary: Remove um evento pelo ID
+ *     summary: Cancela um evento pelo ID (apenas administradores)
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,7 +160,7 @@ router.put("/:id", EventController.update);
  *         description: ID do evento
  *     responses:
  *       200:
- *         description: Evento deletado com sucesso.
+ *         description: Evento cancelado com sucesso.
  *         content:
  *           application/json:
  *             schema:
@@ -153,9 +168,18 @@ router.put("/:id", EventController.update);
  *               properties:
  *                 message:
  *                   type: string
- *       500:
- *         description: Erro interno ao deletar o evento.
+ *       401:
+ *         description: Token de autenticação não fornecido.
+ *       403:
+ *         description: Acesso negado ou token inválido.
+ *       404:
+ *         description: Evento não encontrado.
  */
-router.delete("/:id", EventController.delete);
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeRole("admin"),
+  EventController.delete,
+);
 
 module.exports = router;
