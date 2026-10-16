@@ -1,12 +1,24 @@
 /**
  * @file authService.js
- * @description Regras de negócio para autenticação e gestão de utilizadores.
+ * @description Regras de negócio para autenticação e gestão de usuárioes.
  */
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 
 class AuthService {
+  /**
+   * Cria uma sessão para o usuário, gerando um token JWT
+   * e retornando os dados básicos do usuário autenticado.
+   *
+   * @param {Object} user - Objeto do usuário previamente carregado/persistido.
+   * @param {number|string} user.id - Identificador único do usuário.
+   * @param {string} user.name - Nome do usuário.
+   * @param {string} user.email - E-mail do usuário.
+   * @param {string} user.role - Papel/perfil do usuário (ex.: "admin", "user").
+   * @returns {{ token: string, user: { id: number|string, name: string, email: string, role: string } }}
+   * Objeto contendo o token JWT (validade de 8 horas) e os dados básicos do usuário.
+   */
   createSession(user) {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -42,6 +54,23 @@ class AuthService {
     return this.createSession(user);
   }
 
+  /**
+   * Registra um novo usuário no sistema.
+   *
+   * Normaliza o e-mail (remove espaços e converte para minúsculas),
+   * verifica se já existe uma conta com o mesmo e-mail, aplica hash
+   * na senha com bcrypt e persiste o novo usuário. Em caso de
+   * sucesso, cria imediatamente uma sessão para o usuário recém-criado.
+   *
+   * @param {string} name - Nome do usuário (será armazenado sem espaços nas extremidades).
+   * @param {string} email - E-mail do usuário (será normalizado para minúsculas e sem espaços).
+   * @param {string} password - Senha em texto plano (será armazenada como hash bcrypt).
+   * @returns {Promise<{ token: string, user: { id: number|string, name: string, email: string, role: string } }>}
+   * Objeto contendo o token JWT e os dados básicos do usuário recém-registado.
+   * @throws {Error} Com `status = 409` se já existir uma conta com o e-mail informado
+   * (verificação prévia ou captura de `ER_DUP_ENTRY` do banco de dados).
+   * @throws {Error} Repassa outros erros inesperados lançados pela camada de persistência.
+   */
   async register(name, email, password) {
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -63,9 +92,7 @@ class AuthService {
       return this.createSession(user);
     } catch (error) {
       if (error.code === "ER_DUP_ENTRY") {
-        const conflictError = new Error(
-          "Já existe uma conta com este e-mail.",
-        );
+        const conflictError = new Error("Já existe uma conta com este e-mail.");
         conflictError.status = 409;
         throw conflictError;
       }
