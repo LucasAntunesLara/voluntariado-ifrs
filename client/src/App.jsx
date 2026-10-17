@@ -10,6 +10,7 @@ import Register from "./pages/auth/register";
 import EventsList from "./pages/events";
 import CreateEvent from "./pages/events/create";
 import Dashboard from "./pages/dashboard";
+import Home from "./pages/home";
 import Profile from "./pages/profile";
 import { useAuth } from "./contexts/useAuth";
 
@@ -19,7 +20,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: user ? <Dashboard /> : <Header />,
+      element: user ? <Dashboard /> : <Home />,
     },
     {
       path: "/login",
