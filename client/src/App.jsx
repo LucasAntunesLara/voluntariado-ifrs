@@ -13,6 +13,7 @@ import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Profile from "./pages/profile";
 import { useAuth } from "./contexts/useAuth";
+import Volunteers from "./pages/volunteers";
 
 function App() {
   const { user } = useAuth();
@@ -49,6 +50,11 @@ function App() {
     {
       path: "/perfil",
       element: user ? <Profile /> : <Navigate to="/login" replace />,
+    },
+    {
+      path: "/voluntarios",
+      element:
+        user?.role === "admin" ? <Volunteers /> : <Navigate to="/" replace />,
     },
   ]);
 
