@@ -16,6 +16,18 @@ import { useAuth } from "@/contexts/useAuth";
 import api from "@/services/api";
 import Header from "@/components/layout/header";
 
+const formatPhone = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+
+  if (digits.length <= 2) return digits ? `(${digits}` : "";
+
+  const areaCode = digits.slice(0, 2);
+  const number = digits.slice(2);
+
+  if (number.length <= 5) return `(${areaCode}) ${number}`;
+  return `(${areaCode}) ${number.slice(0, 5)}-${number.slice(5)}`;
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -26,14 +38,18 @@ export default function Register() {
     getValues,
     formState: { errors, isSubmitting },
   } = useForm();
+  const phoneField = register("phone", {
+    required: "Informe seu telefone.",
+  });
 
-  const onSubmit = async ({ name, email, password }) => {
+  const onSubmit = async ({ name, email, phone, password }) => {
     setSubmitError("");
 
     try {
       const { data } = await api.post("/auth/register", {
         name,
         email,
+        phone,
         password,
       });
 
@@ -120,6 +136,29 @@ export default function Register() {
                     <FieldError
                       id="email-error"
                       errors={errors.email ? [errors.email] : []}
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="phone">Telefone</FieldLabel>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(54) 00000-0000"
+                      autoComplete="tel"
+                      aria-invalid={Boolean(errors.phone)}
+                      aria-describedby={
+                        errors.phone ? "phone-error" : undefined
+                      }
+                      {...phoneField}
+                      onChange={(event) => {
+                        event.target.value = formatPhone(event.target.value);
+                        phoneField.onChange(event);
+                      }}
+                    />
+                    <FieldError
+                      id="phone-error"
+                      errors={errors.phone ? [errors.phone] : []}
                     />
                   </Field>
 

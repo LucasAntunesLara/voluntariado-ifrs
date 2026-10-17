@@ -68,7 +68,7 @@ class UserModel {
     return result.affectedRows > 0;
   }
 
-  async createVolunteer({ name, email, password }) {
+  async createVolunteer({ name, email, phone, password }) {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -89,13 +89,13 @@ class UserModel {
           throw error;
         }
         await connection.execute(
-          "UPDATE volunteers SET user_id = ? WHERE id = ?",
-          [userResult.insertId, existingVolunteers[0].id],
+          "UPDATE volunteers SET user_id = ?, phone = ? WHERE id = ?",
+          [userResult.insertId, phone, existingVolunteers[0].id],
         );
       } else {
         await connection.execute(
-          "INSERT INTO volunteers (name, email, user_id) VALUES (?, ?, ?)",
-          [name, email, userResult.insertId],
+          "INSERT INTO volunteers (name, email, phone, user_id) VALUES (?, ?, ?, ?)",
+          [name, email, phone, userResult.insertId],
         );
       }
       await connection.commit();

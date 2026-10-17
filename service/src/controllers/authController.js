@@ -31,12 +31,18 @@ class AuthController {
 
   async register(req, res) {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, phone, password } = req.body;
 
-      if (!name?.trim() || !email?.trim() || !password) {
+      if (
+        !name?.trim() ||
+        !email?.trim() ||
+        typeof phone !== "string" ||
+        !phone.trim() ||
+        !password
+      ) {
         return res
           .status(400)
-          .json({ error: "Nome, e-mail e senha são obrigatórios." });
+          .json({ error: "Nome, e-mail, telefone e senha são obrigatórios." });
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -49,7 +55,7 @@ class AuthController {
           .json({ error: "A senha deve ter pelo menos 8 caracteres." });
       }
 
-      const result = await authService.register(name, email, password);
+      const result = await authService.register(name, email, phone, password);
 
       return res.status(201).json(result);
     } catch (error) {
