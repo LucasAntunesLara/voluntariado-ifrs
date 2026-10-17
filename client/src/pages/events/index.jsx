@@ -140,7 +140,7 @@ export default function EventsList() {
               Ações de Voluntariado
             </h1>
 
-            {user.role === "admin" && (
+            {user?.role === "admin" && (
               <Button
                 asChild
                 size="lg"
@@ -210,7 +210,7 @@ export default function EventsList() {
                           Entre para solicitar participação
                         </Link>
                       </Button>
-                    ) : user.role === "admin" ? (
+                    ) : user?.role === "admin" ? (
                       <>
                         <Button asChild className="w-fit" variant="outline">
                           <Link
