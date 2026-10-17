@@ -5,6 +5,7 @@
 
 const { Router } = require("express");
 const VolunteerController = require("../controllers/volunteerController");
+const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
 
 const router = Router();
 
@@ -33,7 +34,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor.
  */
-router.get("/", VolunteerController.getAll);
+router.get("/", verifyToken, authorizeRole("admin"), VolunteerController.getAll);
 
 /**
  * @swagger

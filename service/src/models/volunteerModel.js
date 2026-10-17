@@ -7,14 +7,52 @@ const db = require("../config/database");
 
 class VolunteerModel {
   /**
-   * Retorna todos os voluntários cadastrados.
+   * Retorna as contas de voluntários com seus dados complementares e inscrições.
    * @returns {Promise<Array>} Lista de voluntários.
    */
   async findAll() {
-    const [rows] = await db.query(
-      "SELECT id, name, email, phone, course_or_affiliation, created_at FROM volunteers ORDER BY name ASC",
+    const [volunteers] = await db.query(
+      `SELECT u.id, u.name, u.email, u.role, u.created_at AS createdAt,
+              v.id AS volunteerId, v.phone,
+              v.course_or_affiliation AS courseOrAffiliation
+       FROM users u
+       LEFT JOIN volunteers v
+         ON v.user_id = u.id OR (v.user_id IS NULL AND v.email = u.email)
+       WHERE u.role = 'volunteer'
+       ORDER BY u.name ASC`,
     );
-    return rows;
+
+    const [registrations] = await db.query(
+      `SELECT COALESCE(ev.user_id, v.user_id) AS userId,
+              e.title AS eventTitle, ev.status, ev.registered_at AS registeredAt
+       FROM event_volunteers ev
+       JOIN events e ON e.id = ev.event_id
+       LEFT JOIN volunteers v ON v.id = ev.volunteer_id
+       WHERE COALESCE(ev.user_id, v.user_id) IS NOT NULL
+         AND EXISTS (
+           SELECT 1
+           FROM users u
+           WHERE u.id = COALESCE(ev.user_id, v.user_id)
+             AND u.role = 'volunteer'
+         )
+       ORDER BY ev.registered_at DESC`,
+    );
+
+    const registrationsByUser = new Map();
+    for (const registration of registrations) {
+      const userRegistrations = registrationsByUser.get(registration.userId) || [];
+      userRegistrations.push({
+        eventTitle: registration.eventTitle,
+        status: registration.status,
+        registeredAt: registration.registeredAt,
+      });
+      registrationsByUser.set(registration.userId, userRegistrations);
+    }
+
+    return volunteers.map((volunteer) => ({
+      ...volunteer,
+      events: registrationsByUser.get(volunteer.id) || [],
+    }));
   }
 
   /**

@@ -132,6 +132,7 @@ class AuthService {
    *
    * @param {string} name - Nome do usuário (será armazenado sem espaços nas extremidades).
    * @param {string} email - E-mail do usuário (será normalizado para minúsculas e sem espaços).
+   * @param {string} phone - Telefone do voluntário.
    * @param {string} password - Senha em texto plano (será armazenada como hash bcrypt).
    * @returns {Promise<{ token: string, user: { id: number|string, name: string, email: string, role: string } }>}
    * Objeto contendo o token JWT e os dados básicos do usuário recém-registado.
@@ -139,7 +140,7 @@ class AuthService {
    * (verificação prévia ou captura de `ER_DUP_ENTRY` do banco de dados).
    * @throws {Error} Repassa outros erros inesperados lançados pela camada de persistência.
    */
-  async register(name, email, password) {
+  async register(name, email, phone, password) {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (await userModel.findByEmail(normalizedEmail)) {
@@ -154,6 +155,7 @@ class AuthService {
       const user = await userModel.createVolunteer({
         name: name.trim(),
         email: normalizedEmail,
+        phone: phone.trim(),
         password: hashedPassword,
       });
 
