@@ -40,12 +40,14 @@ const Header = () => {
       <nav className="flex items-center gap-4">
         {user && (
           <>
-            <Button asChild variant="ghost" size="lg" className="gap-2">
-              <a href="/voluntarios" className="flex items-center gap-1">
-                <PersonStanding className="h-4 w-4" />
-                <span>Voluntários</span>
-              </a>
-            </Button>
+            {user.role === "admin" && (
+              <Button asChild variant="ghost" size="lg" className="gap-2">
+                <a href="/voluntarios" className="flex items-center gap-1">
+                  <PersonStanding className="h-4 w-4" />
+                  <span>Voluntários</span>
+                </a>
+              </Button>
+            )}
 
             <Button asChild variant="ghost" size="lg" className="gap-2">
               <a href="/eventos" className="flex items-center gap-1">
