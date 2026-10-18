@@ -62,6 +62,11 @@ class AuthService {
     return this.createSession(user);
   }
 
+  /**
+   * @param {number} id - Identificador do usuário.
+   * @returns {Promise<Object>} Dados públicos do perfil.
+   * @throws {Error} Com status 404 se a conta não existir.
+   */
   async getProfile(id) {
     const user = await userModel.findProfileById(id);
     if (!user) {
@@ -72,6 +77,12 @@ class AuthService {
     return user;
   }
 
+  /**
+   * Valida e persiste as alterações do perfil.
+   * @param {number} id - Identificador do usuário.
+   * @param {{name: string, email: string}} profile - Novos dados do perfil.
+   * @returns {Promise<Object>} Perfil público atualizado.
+   */
   async updateProfile(id, { name, email }) {
     const normalizedName = name?.trim();
     const normalizedEmail = email?.trim().toLowerCase();
@@ -113,6 +124,11 @@ class AuthService {
     return this.getProfile(id);
   }
 
+  /**
+   * @param {number} id - Identificador do usuário.
+   * @returns {Promise<void>}
+   * @throws {Error} Com status 404 se nenhuma conta for excluída.
+   */
   async deleteAccount(id) {
     const deleted = await userModel.deleteAccount(id);
     if (!deleted) {
@@ -171,6 +187,13 @@ class AuthService {
     }
   }
 
+  /**
+   * Valida e persiste um novo administrador.
+   * @param {string} name - Nome do administrador.
+   * @param {string} email - Endereço de e-mail do administrador.
+   * @param {string} password - Senha em texto plano, armazenada como hash.
+   * @returns {Promise<Object>} Dados do administrador criado.
+   */
   async createAdmin(name, email, password) {
     const normalizedEmail = email.trim().toLowerCase();
     if (await userModel.findByEmail(normalizedEmail)) {

@@ -5,7 +5,6 @@ import {
   Mail,
   Phone,
   RefreshCw,
-  Search,
   UsersRound,
 } from "lucide-react";
 import Header from "@/components/layout/header";
@@ -51,6 +50,14 @@ const statusStyles = {
   rejected: "bg-rose-50 text-rose-700",
 };
 
+async function fetchVolunteers() {
+  const response = await api.get("/volunteers");
+  if (!Array.isArray(response.data)) {
+    throw new Error("Formato inesperado na resposta da API.");
+  }
+  return response.data;
+}
+
 export default function Volunteers() {
   const [volunteers, setVolunteers] = useState([]);
   const [search, setSearch] = useState("");
@@ -62,11 +69,7 @@ export default function Volunteers() {
     setError("");
 
     try {
-      const response = await api.get("/volunteers");
-      if (!Array.isArray(response.data)) {
-        throw new Error("Formato inesperado na resposta da API.");
-      }
-      setVolunteers(response.data);
+      setVolunteers(await fetchVolunteers());
     } catch {
       setError("Não foi possível carregar os voluntários. Tente novamente.");
     } finally {
@@ -75,8 +78,26 @@ export default function Volunteers() {
   }, []);
 
   useEffect(() => {
-    loadVolunteers();
-  }, [loadVolunteers]);
+    let active = true;
+    fetchVolunteers()
+      .then((data) => {
+        if (active) setVolunteers(data);
+      })
+      .catch(() => {
+        if (active) {
+          setError(
+            "Não foi possível carregar os voluntários. Tente novamente.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredVolunteers = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");

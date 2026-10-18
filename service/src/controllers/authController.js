@@ -29,6 +29,11 @@ class AuthController {
     }
   }
 
+  /**
+   * Registra um voluntário e inicia a sessão.
+   * @param {import('express').Request} req - Requisição com os dados cadastrais.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async register(req, res) {
     try {
       const { name, email, phone, password } = req.body;
@@ -63,6 +68,11 @@ class AuthController {
     }
   }
 
+  /**
+   * Retorna o perfil do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com o usuário do JWT.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async getProfile(req, res) {
     try {
       const profile = await authService.getProfile(req.user.id);
@@ -72,6 +82,11 @@ class AuthController {
     }
   }
 
+  /**
+   * Atualiza o perfil do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com os campos do perfil.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async updateProfile(req, res) {
     try {
       const profile = await authService.updateProfile(req.user.id, req.body);
@@ -81,6 +96,11 @@ class AuthController {
     }
   }
 
+  /**
+   * Exclui a conta do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com o usuário do JWT.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async deleteAccount(req, res) {
     try {
       await authService.deleteAccount(req.user.id);
@@ -90,6 +110,11 @@ class AuthController {
     }
   }
 
+  /**
+   * Cria uma conta de administrador.
+   * @param {import('express').Request} req - Requisição com os dados do admin.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async createAdmin(req, res) {
     try {
       const { name, email, password } = req.body;
@@ -116,8 +141,9 @@ class AuthController {
 
   /**
    * Retorna os dados do dashboard para o usuário autenticado.
-   * @param {Object} req - Requisição HTTP (contém dados decodificados do JWT via middleware).
-   * @param {Object} res - Resposta HTTP.
+   * @param {import('express').Request} req - Requisição com o usuário do JWT.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<void>}
    */
   async getDashboard(req, res) {
     try {

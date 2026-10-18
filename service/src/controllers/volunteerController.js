@@ -3,7 +3,7 @@
  * @description Camada de Controller para gerenciamento de requisições de voluntários.
  */
 
-const VolunteerService = require("../services/VolunteerService");
+const VolunteerService = require("../services/volunteerService");
 
 class VolunteerController {
   /**

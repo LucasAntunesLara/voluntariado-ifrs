@@ -4,10 +4,7 @@
  */
 
 const { Router } = require("express");
-const {
-  verifyToken,
-  authorizeRole,
-} = require("../middlewares/authMiddleware");
+const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
 const eventVolunteerController = require("../controllers/eventVolunteerController");
 const authController = require("../controllers/authController");
 

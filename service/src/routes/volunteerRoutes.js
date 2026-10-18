@@ -22,6 +22,8 @@ const router = Router();
  *   get:
  *     summary: Retorna a lista de todos os voluntários
  *     tags: [Volunteers]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de voluntários retornada com sucesso.
@@ -33,8 +35,17 @@ const router = Router();
  *                 type: object
  *       500:
  *         description: Erro interno do servidor.
+ *       401:
+ *         description: Token de autenticação não fornecido.
+ *       403:
+ *         description: Acesso permitido apenas para administradores.
  */
-router.get("/", verifyToken, authorizeRole("admin"), VolunteerController.getAll);
+router.get(
+  "/",
+  verifyToken,
+  authorizeRole("admin"),
+  VolunteerController.getAll,
+);
 
 /**
  * @swagger
@@ -74,11 +85,19 @@ router.get("/:id", VolunteerController.getById);
  *             schema:
  *               type: object
  *               required:
- *                 - title
+ *                 - name
+ *                 - email
+ *                 - phone
  *               properties:
- *                 title:
+ *                 name:
  *                   type: string
- *                   description: Título do voluntário
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                 phone:
+ *                   type: string
+ *                 courseOrAffiliation:
+ *                   type: string
  *     responses:
  *       201:
  *         description: voluntário criado com sucesso.
@@ -93,6 +112,8 @@ router.get("/:id", VolunteerController.getById);
  *                   type: string
  *       400:
  *         description: Dados inválidos.
+ *       409:
+ *         description: Já existe um voluntário com este e-mail.
  */
 router.post("/", VolunteerController.create);
 
@@ -115,6 +136,16 @@ router.post("/", VolunteerController.create);
  *           application/json:
  *             schema:
  *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                 phone:
+ *                   type: string
+ *                 courseOrAffiliation:
+ *                   type: string
  *     responses:
  *       200:
  *         description: voluntário atualizado com sucesso.

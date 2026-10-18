@@ -33,6 +33,13 @@ class EventVolunteerModel {
     return rows[0].total;
   }
 
+  /**
+   * Cria uma solicitação de inscrição sob bloqueio transacional do evento.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} userId - Identificador do usuário voluntário.
+   * @returns {Promise<Object>} Resumo da solicitação criada ou reaberta.
+   * @throws {Error} Se o evento não existir, estiver cheio ou já houver inscrição.
+   */
   async createRequest(eventId, userId) {
     const connection = await pool.getConnection();
     try {
@@ -97,6 +104,12 @@ class EventVolunteerModel {
     }
   }
 
+  /**
+   * Atualiza uma solicitação pendente e revalida a capacidade do evento.
+   * @param {number} requestId - Identificador da solicitação.
+   * @param {"approved"|"rejected"} decision - Decisão do administrador.
+   * @returns {Promise<Object>} Solicitação atualizada e indicador de lotação.
+   */
   async reviewRequest(requestId, decision) {
     const connection = await pool.getConnection();
     try {
@@ -166,6 +179,10 @@ class EventVolunteerModel {
     }
   }
 
+  /**
+   * Lista as solicitações com os dados de evento e voluntário.
+   * @returns {Promise<Array<Object>>} Solicitações ordenadas por status e data.
+   */
   async findRequestsForAdmin() {
     const [rows] = await pool.query(
       `SELECT ev.id, ev.event_id AS eventId, ev.user_id AS userId, ev.status,
@@ -180,6 +197,11 @@ class EventVolunteerModel {
     return rows;
   }
 
+  /**
+   * Lista as solicitações de um usuário.
+   * @param {number} userId - Identificador do usuário.
+   * @returns {Promise<Array<Object>>} Solicitações do usuário.
+   */
   async findRequestsByUser(userId) {
     const [rows] = await pool.query(
       `SELECT ev.id, ev.event_id AS eventId, ev.status,

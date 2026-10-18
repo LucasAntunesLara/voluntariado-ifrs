@@ -53,7 +53,10 @@ export default function Profile() {
   }, []);
 
   const updateField = (event) => {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+    setForm((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }));
   };
 
   const cancelEditing = () => {
@@ -289,9 +292,7 @@ export default function Profile() {
                 </section>
 
                 <section className="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
-                  <h2 className="font-semibold text-gray-900">
-                    Excluir conta
-                  </h2>
+                  <h2 className="font-semibold text-gray-900">Excluir conta</h2>
                   <p className="mt-2 text-sm leading-6 text-gray-600">
                     A exclusão é permanente e remove seu acesso e seus dados
                     associados.

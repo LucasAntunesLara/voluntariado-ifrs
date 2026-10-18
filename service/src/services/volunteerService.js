@@ -18,12 +18,17 @@ class VolunteerService {
    * Retorna um voluntário pelo ID.
    * @returns {Promise<Array>}
    */
+  /**
+   * @param {number|string} id - Volunteer identifier.
+   * @returns {Promise<Object>} Matching volunteer.
+   * @throws {Error} If the volunteer does not exist.
+   */
   async getById(id) {
-    const event = await VolunteerModel.findById(id);
+    const volunteer = await VolunteerModel.findById(id);
 
-    if (!event) throw new Error("Voluntário não encontrado.");
+    if (!volunteer) throw new Error("Voluntário não encontrado.");
 
-    return event;
+    return volunteer;
   }
 
   /**

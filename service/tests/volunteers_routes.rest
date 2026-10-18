@@ -1,8 +1,22 @@
 ### Variáveis de ambiente (opcional, se estiver usando a extensão REST Client no VS Code)
 @baseUrl = http://localhost:3000
 
+### Login do administrador
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br",
+  "password": "123456"
+}
+
+###
+@tokenAdmin = {{loginAdmin.response.body.token}}
+
 ### 1. Listar todos os voluntários  [SUCESSO]
 GET {{baseUrl}}/volunteers
+Authorization: Bearer {{tokenAdmin}}
 
 ### 2. Buscar voluntário por ID [SUCESSO]
 GET {{baseUrl}}/volunteers/1

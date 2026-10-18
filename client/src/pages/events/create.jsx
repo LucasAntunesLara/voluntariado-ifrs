@@ -31,37 +31,44 @@ export default function CreateEvent() {
     max_volunteers: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [loadingEvent, setLoadingEvent] = useState(Boolean(id));
+  const [loadedEventId, setLoadedEventId] = useState(null);
+  const loadingEvent = Boolean(id) && loadedEventId !== id;
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
-    setLoadingEvent(true);
-    setError("");
-
+    let active = true;
     const fetchEvent = async () => {
       try {
         const { data } = await api.get(`/events/${id}`);
-        setForm({
-          title: data.title,
-          description: data.description,
-          location: data.location,
-          date: getLocalDateTimeValue(new Date(data.date)),
-          max_volunteers: String(data.max_volunteers),
-        });
+        if (active) {
+          setForm({
+            title: data.title,
+            description: data.description,
+            location: data.location,
+            date: getLocalDateTimeValue(new Date(data.date)),
+            max_volunteers: String(data.max_volunteers),
+          });
+          setError("");
+        }
       } catch (requestError) {
-        setError(
-          requestError?.response?.data?.error ||
-            "Não foi possível carregar os dados do evento.",
-        );
+        if (active) {
+          setError(
+            requestError?.response?.data?.error ||
+              "Não foi possível carregar os dados do evento.",
+          );
+        }
       } finally {
-        setLoadingEvent(false);
+        if (active) setLoadedEventId(id);
       }
     };
 
     fetchEvent();
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   if (!user) return <Navigate to="/login" replace />;
@@ -250,7 +257,9 @@ export default function CreateEvent() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={submitting || loadingEvent || Boolean(error && id)}
+                    disabled={
+                      submitting || loadingEvent || Boolean(error && id)
+                    }
                     className="bg-emerald-700 text-white hover:bg-emerald-800"
                   >
                     {submitting

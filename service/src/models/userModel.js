@@ -17,6 +17,10 @@ class UserModel {
     return rows[0] || null;
   }
 
+  /**
+   * @param {number} id - User identifier.
+   * @returns {Promise<Object|null>} Public profile fields, if found.
+   */
   async findProfileById(id) {
     const [rows] = await db.execute(
       `SELECT u.id, u.name, u.email, u.role, u.created_at AS createdAt
@@ -27,6 +31,12 @@ class UserModel {
     return rows[0] || null;
   }
 
+  /**
+   * Atualiza a conta e o cadastro de voluntário associado atomicamente.
+   * @param {number} id - Identificador do usuário.
+   * @param {{name: string, email: string}} profile - Novos dados do perfil.
+   * @returns {Promise<void>}
+   */
   async updateProfile(id, { name, email }) {
     const connection = await db.getConnection();
     try {
@@ -63,11 +73,20 @@ class UserModel {
     }
   }
 
+  /**
+   * @param {number} id - Identificador do usuário.
+   * @returns {Promise<boolean>} Indica se uma conta foi excluída.
+   */
   async deleteAccount(id) {
     const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
     return result.affectedRows > 0;
   }
 
+  /**
+   * Cria uma conta de voluntário e associa cadastro existente, se houver.
+   * @param {{name: string, email: string, phone: string, password: string}} user
+   * @returns {Promise<Object>} Dados da conta criada.
+   */
   async createVolunteer({ name, email, phone, password }) {
     const connection = await db.getConnection();
     try {
@@ -113,6 +132,10 @@ class UserModel {
     }
   }
 
+  /**
+   * @param {{name: string, email: string, password: string}} user - Dados do admin.
+   * @returns {Promise<Object>} Dados do administrador criado.
+   */
   async createAdmin({ name, email, password }) {
     const [result] = await db.execute(
       "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin')",

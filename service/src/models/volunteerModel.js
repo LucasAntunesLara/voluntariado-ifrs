@@ -40,7 +40,8 @@ class VolunteerModel {
 
     const registrationsByUser = new Map();
     for (const registration of registrations) {
-      const userRegistrations = registrationsByUser.get(registration.userId) || [];
+      const userRegistrations =
+        registrationsByUser.get(registration.userId) || [];
       userRegistrations.push({
         eventTitle: registration.eventTitle,
         status: registration.status,

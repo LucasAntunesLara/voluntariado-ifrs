@@ -16,10 +16,15 @@ class EventController {
       const events = await EventService.getAll();
       res.json(events);
     } catch (error) {
-      res.status(error.status || 500).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
     }
   }
 
+  /**
+   * Retorna um evento pelo ID.
+   * @param {import('express').Request} req - Requisição HTTP.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   static async getById(req, res) {
     try {
       const id = req.params.id;
@@ -27,34 +32,51 @@ class EventController {
       const event = await EventService.getById(id);
       res.json(event);
     } catch (error) {
-      res.status(error.status || 404).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
     }
   }
 
+  /**
+   * Cria um evento a partir da requisição do administrador autenticado.
+   * @param {import('express').Request} req - Requisição HTTP.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   static async create(req, res) {
     try {
-      const id = await EventService.create(req.body, req.user);
-      res.status(201).json({ message: "Evento criado com sucesso.", id });
+      const id = await EventService.create(req.body);
+      return res
+        .status(201)
+        .json({ message: "Evento criado com sucesso.", id });
     } catch (error) {
-      res.status(error.status || 400).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
     }
   }
 
+  /**
+   * Atualiza os dados de um evento.
+   * @param {import('express').Request} req - Requisição HTTP.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   static async update(req, res) {
     try {
       const id = req.params.id;
       await EventService.update(id, req.body, req.user);
-      res.json({ message: "Evento atualizado com sucesso." });
+      return res.json({ message: "Evento atualizado com sucesso." });
     } catch (error) {
-      res.status(error.status || 400).json({ error: error.message });
+      return res.status(error.status || 500).json({ error: error.message });
     }
   }
 
+  /**
+   * Exclui um evento pelo ID.
+   * @param {import('express').Request} req - Requisição HTTP.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   static async delete(req, res) {
     try {
       const id = req.params.id;
       await EventService.delete(id, req.user);
-      res.json({ message: "Evento deletado com sucesso." });
+      return res.json({ message: "Evento deletado com sucesso." });
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
     }

@@ -67,6 +67,8 @@ router.get("/:id", EventController.getById);
  *   post:
  *     summary: Cria um novo evento
  *     tags: [Events]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -75,10 +77,24 @@ router.get("/:id", EventController.getById);
  *               type: object
  *               required:
  *                 - title
+ *                 - description
+ *                 - location
+ *                 - date
+ *                 - max_volunteers
  *               properties:
  *                 title:
  *                   type: string
  *                   description: Título do evento
+ *                 description:
+ *                   type: string
+ *                 location:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 max_volunteers:
+ *                   type: integer
+ *                   minimum: 1
  *     responses:
  *       201:
  *         description: Evento criado com sucesso.
@@ -93,6 +109,10 @@ router.get("/:id", EventController.getById);
  *                   type: string
  *       400:
  *         description: Dados inválidos.
+ *       401:
+ *         description: Token de autenticação não fornecido.
+ *       403:
+ *         description: Acesso permitido apenas para administradores.
  */
 router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
 
@@ -103,7 +123,7 @@ router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
  *     summary: Atualiza um evento existente (apenas administradores)
  *     tags: [Events]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -136,12 +156,7 @@ router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
  *       404:
  *         description: Evento não encontrado.
  */
-router.put(
-  "/:id",
-  verifyToken,
-  authorizeRole("admin"),
-  EventController.update,
-);
+router.put("/:id", verifyToken, authorizeRole("admin"), EventController.update);
 
 /**
  * @swagger
@@ -150,7 +165,7 @@ router.put(
  *     summary: Cancela um evento pelo ID (apenas administradores)
  *     tags: [Events]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

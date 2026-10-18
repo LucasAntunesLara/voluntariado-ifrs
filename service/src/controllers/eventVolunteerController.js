@@ -59,6 +59,11 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Lista as solicitações de participação para administradores.
+   * @param {import('express').Request} req - Requisição HTTP.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async listAdminRequests(req, res) {
     try {
       const requests = await eventVolunteerService.getRequestsForAdmin();
@@ -68,6 +73,11 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Lista as solicitações de participação do voluntário autenticado.
+   * @param {import('express').Request} req - Requisição com o usuário do JWT.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async listMyRequests(req, res) {
     try {
       const requests = await eventVolunteerService.getRequestsByUser(
@@ -79,6 +89,11 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Analisa uma solicitação de participação.
+   * @param {import('express').Request} req - Requisição com o status da análise.
+   * @param {import('express').Response} res - Resposta HTTP.
+   */
   async reviewRequest(req, res) {
     try {
       const { status } = req.body;

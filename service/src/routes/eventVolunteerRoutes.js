@@ -5,10 +5,7 @@
 
 const { Router } = require("express");
 const eventVolunteerController = require("../controllers/eventVolunteerController");
-const {
-  verifyToken,
-  authorizeRole,
-} = require("../middlewares/authMiddleware");
+const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
 
 const router = Router();
 

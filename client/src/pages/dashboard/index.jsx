@@ -12,10 +12,17 @@ const statusLabels = {
   rejected: "Recusada",
 };
 
+async function fetchRequests(endpoint) {
+  const { data } = await api.get(endpoint);
+  return data;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadedRole, setLoadedRole] = useState(null);
+  const hasDashboardRole = user?.role === "admin" || user?.role === "volunteer";
+  const loading = hasDashboardRole && loadedRole !== user.role;
   const [busyRequest, setBusyRequest] = useState(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -27,32 +34,48 @@ export default function Dashboard() {
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
 
   const loadRequests = useCallback(async (endpoint) => {
-    setError("");
     try {
-      const { data } = await api.get(endpoint);
-      setRequests(data);
+      setRequests(await fetchRequests(endpoint));
+      setError("");
     } catch (loadError) {
       setError(
         loadError?.response?.data?.error ||
           "Não foi possível carregar as solicitações.",
       );
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (user?.role !== "admin" && user?.role !== "volunteer") {
-      setLoading(false);
-      return;
-    }
+    if (!hasDashboardRole) return;
 
     const endpoint =
       user.role === "admin"
         ? "/dashboard/participation-requests"
         : "/dashboard/my-participation-requests";
-    loadRequests(endpoint);
-  }, [user?.role, loadRequests]);
+    let active = true;
+    fetchRequests(endpoint)
+      .then((data) => {
+        if (active) {
+          setRequests(data);
+          setError("");
+        }
+      })
+      .catch((loadError) => {
+        if (active) {
+          setError(
+            loadError?.response?.data?.error ||
+              "Não foi possível carregar as solicitações.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoadedRole(user.role);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.role, hasDashboardRole]);
 
   const reviewRequest = async (requestId, status) => {
     setBusyRequest(requestId);
@@ -158,10 +181,7 @@ export default function Dashboard() {
                 {requests.length === 0 ? (
                   <div className="rounded-lg border bg-white p-6 text-gray-600">
                     Você ainda não solicitou participação em eventos.{" "}
-                    <Link
-                      className="text-emerald-700 underline"
-                      to="/eventos"
-                    >
+                    <Link className="text-emerald-700 underline" to="/eventos">
                       Ver eventos disponíveis
                     </Link>
                   </div>
@@ -196,7 +216,10 @@ export default function Dashboard() {
                     </article>
                   ))
                 )}
-                <Button asChild className="bg-emerald-700 text-white hover:bg-emerald-800">
+                <Button
+                  asChild
+                  className="bg-emerald-700 text-white hover:bg-emerald-800"
+                >
                   <Link to="/eventos">Explorar eventos</Link>
                 </Button>
               </div>
@@ -210,7 +233,10 @@ export default function Dashboard() {
                 <p className="mb-4 text-sm text-gray-600">
                   Crie uma conta com acesso administrativo ao sistema.
                 </p>
-                <form className="grid gap-4 md:grid-cols-2" onSubmit={createAdmin}>
+                <form
+                  className="grid gap-4 md:grid-cols-2"
+                  onSubmit={createAdmin}
+                >
                   <label className="grid gap-1 text-sm font-medium text-gray-700">
                     Nome
                     <Input
@@ -257,12 +283,18 @@ export default function Dashboard() {
                   </div>
                 </form>
                 {adminFormError && (
-                  <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+                  <p
+                    className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700"
+                    role="alert"
+                  >
                     {adminFormError}
                   </p>
                 )}
                 {adminFormNotice && (
-                  <p className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800" role="status">
+                  <p
+                    className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800"
+                    role="status"
+                  >
                     {adminFormNotice}
                   </p>
                 )}

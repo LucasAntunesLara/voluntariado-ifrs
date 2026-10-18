@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint src tests server.js",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\" server.js",
+    "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\" server.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",

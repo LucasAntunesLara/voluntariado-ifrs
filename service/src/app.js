@@ -5,7 +5,7 @@
 const express = require("express");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerDocs = require("./config/swagger");
 
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
@@ -18,25 +18,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API de Gestão de Ações de Voluntariado - IFRS",
-      version: "1.0.0",
-      description:
-        "Documentação da API do sistema de voluntariado do IFRS Campus Bento Gonçalves",
-    },
-    servers: [
-      {
-        url: "http://localhost:3000",
-      },
-    ],
-  },
-  apis: ["./src/routes/*.js"],
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/auth", authRoutes);

@@ -7,10 +7,22 @@ const eventVolunteerModel = require("../models/eventVolunteerModel");
 const eventModel = require("../models/eventModel");
 
 class EventVolunteerService {
+  /**
+   * Cria uma solicitação após verificar a capacidade do evento.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} userId - Identificador do voluntário autenticado.
+   * @returns {Promise<Object>} Resumo da solicitação criada.
+   */
   async requestParticipation(eventId, userId) {
     return await eventVolunteerModel.createRequest(eventId, userId);
   }
 
+  /**
+   * Aplica a decisão do administrador a uma solicitação pendente.
+   * @param {number} requestId - Identificador da solicitação.
+   * @param {"approved"|"rejected"} decision - Resultado da análise.
+   * @returns {Promise<Object>} Resumo da solicitação atualizada.
+   */
   async reviewRequest(requestId, decision) {
     if (!["approved", "rejected"].includes(decision)) {
       const error = new Error("A decisão deve ser 'approved' ou 'rejected'.");
@@ -30,10 +42,15 @@ class EventVolunteerService {
     return result;
   }
 
+  /** @returns {Promise<Array<Object>>} Solicitações disponíveis ao administrador. */
   async getRequestsForAdmin() {
     return await eventVolunteerModel.findRequestsForAdmin();
   }
 
+  /**
+   * @param {number} userId - Identificador do voluntário.
+   * @returns {Promise<Array<Object>>} Solicitações do voluntário.
+   */
   async getRequestsByUser(userId) {
     return await eventVolunteerModel.findRequestsByUser(userId);
   }
