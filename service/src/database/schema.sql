@@ -55,9 +55,7 @@ CREATE TABLE
 CREATE TABLE
     volunteers (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        user_id INT NULL UNIQUE,
+        user_id INT NOT NULL UNIQUE,
         phone VARCHAR(20) NULL,
         course_or_affiliation VARCHAR(100) DEFAULT 'Comunidade Externa',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -111,6 +109,30 @@ VALUES
         'user1@gmail.com',
         '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
         'volunteer'
+    ),
+    (
+        'Rick Sanchez',
+        'ricksanchez@gmail.com',
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
+        'volunteer'
+    ),
+    (
+        'Morty Smith',
+        'mortysmith@gmail.com',
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
+        'volunteer'
+    ),
+    (
+        'Evil Morty',
+        'evilmorty@gmail.com',
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
+        'volunteer'
+    ),
+    (
+        'Jerry Smith',
+        'jerrysmith@gmail.com',
+        '$2b$10$YY6OxOIOdCCFbNFr6Fa/6efJJrcc8muGJfmU4PFeBCks90g8A8BQ6',
+        'volunteer'
     );
 
 INSERT INTO
@@ -145,49 +167,31 @@ VALUES
     );
 
 INSERT INTO
-    volunteers (name, email, phone, course_or_affiliation)
-VALUES
-    (
-        'Rick Sanchez',
-        'ricksanchez@gmail.com',
-        '(54) 99911-2233',
-        'Análise e Desenvolvimento de Sistemas'
-    ),
-    (
-        'Morty Smith',
-        'mortysmith@gmail.com',
-        '(54) 99822-3344',
-        'Informática Para Internet'
-    ),
-    (
-        'Evil Morty',
-        'evilmorty@gmail.com',
-        '(54) 99733-4455',
-        'Comunidade Externa'
-    ),
-    (
-        'Jerry Smith',
-        'jerrysmith@gmail.com',
-        '(54) 99644-5566',
-        'Comunidade Externa'
-    );
-
-INSERT INTO
-    volunteers (name, email, user_id)
+    volunteers (user_id, phone, course_or_affiliation)
 SELECT
-    name,
-    email,
-    id
-FROM
-    users
-WHERE
-    email = 'user1@gmail.com';
+    id,
+    CASE email
+        WHEN 'user1@gmail.com' THEN '(54) 99900-0000'
+        WHEN 'ricksanchez@gmail.com' THEN '(54) 99911-2233'
+        WHEN 'mortysmith@gmail.com' THEN '(54) 99822-3344'
+        WHEN 'evilmorty@gmail.com' THEN '(54) 99733-4455'
+        WHEN 'jerrysmith@gmail.com' THEN '(54) 99644-5566'
+    END,
+    CASE email
+        WHEN 'user1@gmail.com' THEN 'Comunidade Externa'
+        WHEN 'ricksanchez@gmail.com' THEN 'Análise e Desenvolvimento de Sistemas'
+        WHEN 'mortysmith@gmail.com' THEN 'Informática Para Internet'
+        WHEN 'evilmorty@gmail.com' THEN 'Comunidade Externa'
+        WHEN 'jerrysmith@gmail.com' THEN 'Comunidade Externa'
+    END
+FROM users
+WHERE role = 'volunteer';
 
 INSERT INTO
-    event_volunteers (event_id, volunteer_id)
+    event_volunteers (event_id, user_id)
 VALUES
-    (1, 1),
-    (1, 2),
-    (2, 3),
-    (3, 1),
-    (3, 4);
+    (1, 3),
+    (1, 4),
+    (2, 5),
+    (3, 3),
+    (3, 6);

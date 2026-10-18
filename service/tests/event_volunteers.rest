@@ -113,6 +113,7 @@ Content-Type: application/json
   "name": "Ana Beatriz Costa",
   "email": "ana.costa@aluno.ifrs.edu.br",
   "phone": "(54) 98877-6655",
+  "password": "senha-segura-123",
   "courseOrAffiliation": "Informática Biomédica"
 }
 
@@ -124,6 +125,7 @@ Content-Type: application/json
   "name": "Outra Ana",
   "email": "ana.costa@aluno.ifrs.edu.br",
   "phone": "(54) 91122-3344",
+  "password": "senha-segura-123",
   "courseOrAffiliation": "Administração"
 }
 

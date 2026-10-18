@@ -64,6 +64,7 @@ const emptyForm = {
   name: '',
   email: '',
   phone: '',
+  password: '',
   courseOrAffiliation: '',
 }
 
@@ -154,6 +155,7 @@ export default function Volunteers() {
       name: volunteer.name || '',
       email: volunteer.email || '',
       phone: volunteer.phone || '',
+      password: '',
       courseOrAffiliation: volunteer.courseOrAffiliation || '',
     })
     setMutationError('')
@@ -549,7 +551,9 @@ export default function Volunteers() {
                   {editingVolunteer ? 'Editar voluntário' : 'Novo voluntário'}
                 </h2>
                 <p className="mt-1 text-sm text-[#63736a]">
-                  Preencha os dados do cadastro.
+                  {editingVolunteer
+                    ? 'Atualize os dados da conta e do cadastro.'
+                    : 'A criação do voluntário também cria sua conta de acesso.'}
                 </p>
               </div>
               <Button
@@ -622,6 +626,28 @@ export default function Volunteers() {
                   required
                 />
               </div>
+              {!editingVolunteer && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="volunteer-password"
+                    className="text-sm font-medium text-emerald-950">
+                    Senha da conta
+                  </label>
+                  <Input
+                    id="volunteer-password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={form.password}
+                    onChange={updateField}
+                    required
+                  />
+                  <p className="text-xs text-[#829087]">
+                    A senha deve ter pelo menos 8 caracteres.
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label
                   htmlFor="volunteer-affiliation"

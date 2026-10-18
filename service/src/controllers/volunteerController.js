@@ -46,7 +46,7 @@ class VolunteerController {
       const newVolunteer = await VolunteerService.create(req.body)
       return res.status(201).json(newVolunteer)
     } catch (error) {
-      return res.status(400).json({error: error.message})
+      return res.status(error.status || 400).json({error: error.message})
     }
   }
 

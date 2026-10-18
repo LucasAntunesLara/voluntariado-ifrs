@@ -88,6 +88,7 @@ router.get(
  *                 - name
  *                 - email
  *                 - phone
+ *                 - password
  *               properties:
  *                 name:
  *                   type: string
@@ -96,6 +97,9 @@ router.get(
  *                   format: email
  *                 phone:
  *                   type: string
+ *                 password:
+ *                   type: string
+ *                   minLength: 8
  *                 courseOrAffiliation:
  *                   type: string
  *                   description: Curso ou vínculo do voluntário
@@ -113,6 +117,8 @@ router.get(
  *                   type: string
  *       400:
  *         description: Dados inválidos.
+ *       409:
+ *         description: Já existe uma conta com este e-mail.
  */
 router.post(
   '/',

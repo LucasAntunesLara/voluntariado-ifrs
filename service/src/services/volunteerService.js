@@ -4,6 +4,8 @@
  */
 
 const VolunteerModel = require('../models/volunteerModel')
+const UserModel = require('../models/userModel')
+const bcrypt = require('bcryptjs')
 
 class VolunteerService {
   /**
@@ -33,25 +35,57 @@ class VolunteerService {
    * @throws {Error} Se faltarem campos ou se o e-mail já estiver cadastrado.
    */
   async create(volunteerData) {
-    const {name, email, phone, courseOrAffiliation} = volunteerData
+    const {name, email, phone, password, courseOrAffiliation} = volunteerData
 
-    if (!name || !email || !phone) {
-      throw new Error('Nome, e-mail e telefone são obrigatórios.')
+    if (
+      typeof name !== 'string' ||
+      !name.trim() ||
+      typeof email !== 'string' ||
+      !email.trim() ||
+      typeof phone !== 'string' ||
+      !phone.trim() ||
+      typeof password !== 'string' ||
+      !password
+    ) {
+      throw new Error('Nome, e-mail, telefone e senha são obrigatórios.')
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      throw new Error('Informe um e-mail válido.')
+    }
+    if (password.length < 8) {
+      throw new Error('A senha deve ter pelo menos 8 caracteres.')
     }
 
-    const existingVolunteer = await VolunteerModel.findByEmail(email)
-    if (existingVolunteer) {
-      throw new Error('Já existe um voluntário cadastrado com este e-mail.')
+    const normalizedEmail = email.trim().toLowerCase()
+    if (await UserModel.findByEmail(normalizedEmail)) {
+      const error = new Error('Já existe uma conta com este e-mail.')
+      error.status = 409
+      throw error
     }
 
-    const volunteerId = await VolunteerModel.create({
-      name,
-      email,
-      phone,
-      courseOrAffiliation,
-    })
+    let user
+    try {
+      user = await UserModel.createVolunteer({
+        name: name.trim(),
+        email: normalizedEmail,
+        phone: phone.trim(),
+        password: await bcrypt.hash(password, 10),
+        courseOrAffiliation:
+          typeof courseOrAffiliation === 'string'
+            ? courseOrAffiliation.trim() || 'Comunidade Externa'
+            : 'Comunidade Externa',
+      })
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        const conflictError = new Error('Já existe uma conta com este e-mail.')
+        conflictError.status = 409
+        throw conflictError
+      }
+      throw error
+    }
 
-    return await VolunteerModel.findById(volunteerId)
+    const volunteer = await VolunteerModel.findByUserId(user.id)
+    return await VolunteerModel.findById(volunteer.id)
   }
 
   /**
@@ -69,21 +103,24 @@ class VolunteerService {
       throw new Error('Voluntário não encontrado.')
     }
 
-    if (email && email !== existingVolunteer.email) {
-      const emailInUse = await VolunteerModel.findByEmail(email)
-      if (emailInUse) {
+    const normalizedEmail = email?.trim().toLowerCase()
+    if (normalizedEmail && normalizedEmail !== existingVolunteer.email) {
+      const emailInUse = await VolunteerModel.findByEmail(normalizedEmail)
+      const accountInUse = await UserModel.findByEmail(normalizedEmail)
+      if (emailInUse || accountInUse) {
         throw new Error(
-          'O e-mail informado já está a ser utilizado por outro voluntário.',
+          'O e-mail informado já está a ser utilizado por outra conta.',
         )
       }
     }
 
     await VolunteerModel.update(id, {
-      name: name || existingVolunteer.name,
-      email: email || existingVolunteer.email,
+      name: name?.trim() || existingVolunteer.name,
+      email: normalizedEmail || existingVolunteer.email,
       phone: phone || existingVolunteer.phone,
       courseOrAffiliation:
-        courseOrAffiliation || existingVolunteer.course_or_affiliation,
+        courseOrAffiliation?.trim() ||
+        existingVolunteer.course_or_affiliation,
     })
 
     return await VolunteerModel.findById(id)

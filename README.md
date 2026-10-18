@@ -78,12 +78,12 @@ O script [`service/src/database/schema.sql`](service/src/database/schema.sql) cr
 | Campo                   | Tipo                  | Descrição                                     |
 | ----------------------- | --------------------- | --------------------------------------------- |
 | `id`                    | INT                   | Identificador único, auto incremento          |
-| `name`                  | VARCHAR(100)          | Nome do voluntário                            |
-| `email`                 | VARCHAR(100)          | E-mail único                                  |
-| `user_id`               | INT, opcional         | Vínculo único com uma conta em `users`        |
+| `user_id`               | INT                   | Vínculo obrigatório e único com uma conta em `users` |
 | `phone`                 | VARCHAR(20), opcional | Telefone de contato                           |
 | `course_or_affiliation` | VARCHAR(100)          | Curso ou vínculo; padrão `Comunidade Externa` |
 | `created_at`            | TIMESTAMP             | Data de criação                               |
+
+Nome e e-mail são mantidos somente em `users`; o cadastro de voluntário guarda apenas os dados complementares e referencia sua conta por `user_id`.
 
 ### `event_volunteers`
 
@@ -101,7 +101,8 @@ Cada inscrição relaciona um evento a um cadastro de voluntário ou a uma conta
 ## 🛑 Regras de Negócio
 
 - As senhas são armazenadas com hash bcrypt e não são incluídas nos dados públicos do perfil.
-- O cadastro cria uma conta com perfil `volunteer` e a associa a um cadastro de voluntário.
+- O cadastro de voluntário cria em conjunto uma conta com perfil `volunteer` e seu cadastro complementar; todo registro em `volunteers` exige uma conta existente.
+- A criação de voluntários pelo painel administrativo também cria uma conta, usando a senha informada pelo administrador.
 - O token JWT gerado no login tem validade de **8 horas** e identifica o usuário e seu perfil.
 - Apenas administradores podem criar, alterar e remover eventos, além de consultar a lista completa de voluntários e analisar solicitações.
 - Usuários autenticados com perfil `volunteer` podem solicitar participação em eventos.
