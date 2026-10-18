@@ -1,68 +1,63 @@
-import "./App.css";
-import Header from "./components/layout/header";
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
-import Login from "./pages/auth/login";
-import Register from "./pages/auth/register";
-import EventsList from "./pages/events";
-import CreateEvent from "./pages/events/create";
-import Dashboard from "./pages/dashboard";
-import Home from "./pages/home";
-import Profile from "./pages/profile";
-import { useAuth } from "./contexts/useAuth";
-import Volunteers from "./pages/volunteers";
+import './App.css'
+import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom'
+import Login from './pages/auth/login'
+import Register from './pages/auth/register'
+import EventsList from './pages/events'
+import CreateEvent from './pages/events/create'
+import Dashboard from './pages/dashboard'
+import Home from './pages/home'
+import Profile from './pages/profile'
+import {useAuth} from './contexts/useAuth'
+import Volunteers from './pages/volunteers'
 
 function App() {
-  const { user } = useAuth();
+  const {user} = useAuth()
 
   const router = createBrowserRouter([
     {
-      path: "/",
+      path: '/',
       element: user ? <Dashboard /> : <Home />,
     },
     {
-      path: "/login",
+      path: '/login',
       element: <Login />,
     },
     {
-      path: "/cadastro",
+      path: '/cadastro',
       element: <Register />,
     },
     {
-      path: "/eventos",
+      path: '/eventos',
       element: <EventsList />,
     },
     {
-      path: "/eventos/novo",
+      path: '/eventos/novo',
       element: <CreateEvent />,
     },
     {
-      path: "/eventos/:id/editar",
+      path: '/eventos/:id/editar',
       element: <CreateEvent />,
     },
     {
-      path: "/dashboard",
+      path: '/dashboard',
       element: <Dashboard />,
     },
     {
-      path: "/perfil",
+      path: '/perfil',
       element: user ? <Profile /> : <Navigate to="/login" replace />,
     },
     {
-      path: "/voluntarios",
+      path: '/voluntarios',
       element:
-        user?.role === "admin" ? <Volunteers /> : <Navigate to="/" replace />,
+        user?.role === 'admin' ? <Volunteers /> : <Navigate to="/" replace />,
     },
-  ]);
+  ])
 
   return (
     <>
       <RouterProvider router={router} />
     </>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -1,118 +1,116 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarPlus } from "lucide-react";
-import Header from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
+import {useEffect, useState} from 'react'
+import {Link, Navigate, useParams} from 'react-router-dom'
+import {ArrowLeft, CalendarPlus} from 'lucide-react'
+import Header from '@/components/layout/header'
+import {Button} from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import api from "../../services/api";
-import { useAuth } from "@/contexts/useAuth";
+} from '@/components/ui/card'
+import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import api from '../../services/api'
+import {useAuth} from '@/contexts/useAuth'
 
 function getLocalDateTimeValue(date) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 16);
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return localDate.toISOString().slice(0, 16)
 }
 
 export default function CreateEvent() {
-  const { user } = useAuth();
-  const { id } = useParams();
+  const {user} = useAuth()
+  const {id} = useParams()
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    location: "",
-    date: "",
-    max_volunteers: "",
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [loadingEvent, setLoadingEvent] = useState(Boolean(id));
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+    title: '',
+    description: '',
+    location: '',
+    date: '',
+    max_volunteers: '',
+  })
+  const [submitting, setSubmitting] = useState(false)
+  const [loadedEventId, setLoadedEventId] = useState(null)
+  const loadingEvent = Boolean(id) && loadedEventId !== id
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    if (!id) return;
-
-    setLoadingEvent(true);
-    setError("");
+    if (!id) return
 
     const fetchEvent = async () => {
       try {
-        const { data } = await api.get(`/events/${id}`);
+        const {data} = await api.get(`/events/${id}`)
         setForm({
           title: data.title,
           description: data.description,
           location: data.location,
           date: getLocalDateTimeValue(new Date(data.date)),
           max_volunteers: String(data.max_volunteers),
-        });
+        })
       } catch (requestError) {
         setError(
           requestError?.response?.data?.error ||
-            "Não foi possível carregar os dados do evento.",
-        );
+            'Não foi possível carregar os dados do evento.',
+        )
       } finally {
-        setLoadingEvent(false);
+        setLoadedEventId(id)
       }
-    };
-
-    fetchEvent();
-  }, [id]);
-
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== "admin") return <Navigate to="/eventos" replace />;
-
-  const updateField = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setSuccess(false);
-
-    if (!id && new Date(form.date).getTime() <= Date.now()) {
-      setError("A data do evento deve ser futura.");
-      return;
     }
 
-    setSubmitting(true);
+    fetchEvent()
+  }, [id])
+
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'admin') return <Navigate to="/eventos" replace />
+
+  const updateField = event => {
+    const {name, value} = event.target
+    setForm(current => ({...current, [name]: value}))
+  }
+
+  const handleSubmit = async event => {
+    event.preventDefault()
+    setError('')
+    setSuccess(false)
+
+    if (!id && new Date(form.date).getTime() <= Date.now()) {
+      setError('A data do evento deve ser futura.')
+      return
+    }
+
+    setSubmitting(true)
     try {
       const eventData = {
         ...form,
-        date: `${form.date.replace("T", " ")}:00`,
+        date: `${form.date.replace('T', ' ')}:00`,
         max_volunteers: Number(form.max_volunteers),
-      };
-      if (id) {
-        await api.put(`/events/${id}`, eventData);
-      } else {
-        await api.post("/events", eventData);
       }
-      setSuccess(true);
+      if (id) {
+        await api.put(`/events/${id}`, eventData)
+      } else {
+        await api.post('/events', eventData)
+      }
+      setSuccess(true)
       if (!id) {
         setForm({
-          title: "",
-          description: "",
-          location: "",
-          date: "",
-          max_volunteers: "",
-        });
+          title: '',
+          description: '',
+          location: '',
+          date: '',
+          max_volunteers: '',
+        })
       }
     } catch (requestError) {
       setError(
         requestError?.response?.data?.error ||
-          "Não foi possível criar o evento. Tente novamente.",
-      );
+          'Não foi possível criar o evento. Tente novamente.',
+      )
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <>
@@ -132,12 +130,12 @@ export default function CreateEvent() {
                 <CalendarPlus aria-hidden="true" />
               </div>
               <CardTitle className="text-2xl font-bold">
-                {id ? "Editar evento" : "Criar evento"}
+                {id ? 'Editar evento' : 'Criar evento'}
               </CardTitle>
               <CardDescription>
                 {id
-                  ? "Atualize os dados da ação de voluntariado."
-                  : "Preencha os dados da ação de voluntariado."}
+                  ? 'Atualize os dados da ação de voluntariado.'
+                  : 'Preencha os dados da ação de voluntariado.'}
               </CardDescription>
             </CardHeader>
 
@@ -151,8 +149,7 @@ export default function CreateEvent() {
               {error && (
                 <p
                   className="mb-5 rounded-md bg-red-50 p-3 text-sm text-red-700"
-                  role="alert"
-                >
+                  role="alert">
                   {error}
                 </p>
               )}
@@ -160,11 +157,10 @@ export default function CreateEvent() {
               {success && (
                 <div
                   className="mb-5 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800"
-                  role="status"
-                >
+                  role="status">
                   {id
-                    ? "Evento atualizado com sucesso."
-                    : "Evento criado com sucesso."}{" "}
+                    ? 'Evento atualizado com sucesso.'
+                    : 'Evento criado com sucesso.'}{' '}
                   <Link to="/eventos" className="font-semibold underline">
                     Ver eventos
                   </Link>
@@ -250,16 +246,17 @@ export default function CreateEvent() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={submitting || loadingEvent || Boolean(error && id)}
-                    className="bg-emerald-700 text-white hover:bg-emerald-800"
-                  >
+                    disabled={
+                      submitting || loadingEvent || Boolean(error && id)
+                    }
+                    className="bg-emerald-700 text-white hover:bg-emerald-800">
                     {submitting
                       ? id
-                        ? "Salvando alterações..."
-                        : "Criando evento..."
+                        ? 'Salvando alterações...'
+                        : 'Criando evento...'
                       : id
-                        ? "Salvar alterações"
-                        : "Criar evento"}
+                        ? 'Salvar alterações'
+                        : 'Criar evento'}
                   </Button>
                 </div>
               </form>
@@ -268,5 +265,5 @@ export default function CreateEvent() {
         </div>
       </main>
     </>
-  );
+  )
 }
