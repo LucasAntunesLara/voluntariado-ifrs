@@ -3,11 +3,11 @@
  * @description Rotas para o gerenciamento de voluntários
  */
 
-const { Router } = require("express");
-const VolunteerController = require("../controllers/volunteerController");
-const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
+const {Router} = require('express')
+const VolunteerController = require('../controllers/volunteerController')
+const {verifyToken, authorizeRole} = require('../middlewares/authMiddleware')
 
-const router = Router();
+const router = Router()
 
 /**
  * @swagger
@@ -34,7 +34,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor.
  */
-router.get("/", verifyToken, authorizeRole("admin"), VolunteerController.getAll);
+router.get('/', verifyToken, authorizeRole('admin'), VolunteerController.getAll)
 
 /**
  * @swagger
@@ -59,7 +59,7 @@ router.get("/", verifyToken, authorizeRole("admin"), VolunteerController.getAll)
  *       404:
  *         description: voluntário não encontrado.
  */
-router.get("/:id", VolunteerController.getById);
+router.get('/:id', VolunteerController.getById)
 
 /**
  * @swagger
@@ -94,7 +94,7 @@ router.get("/:id", VolunteerController.getById);
  *       400:
  *         description: Dados inválidos.
  */
-router.post("/", VolunteerController.create);
+router.post('/', VolunteerController.create)
 
 /**
  * @swagger
@@ -128,7 +128,7 @@ router.post("/", VolunteerController.create);
  *       400:
  *         description: Dados inválidos ou erro na atualização.
  */
-router.put("/:id", VolunteerController.update);
+router.put('/:id', VolunteerController.update)
 
 /**
  * @swagger
@@ -156,6 +156,6 @@ router.put("/:id", VolunteerController.update);
  *       500:
  *         description: Erro interno ao deletar o voluntário.
  */
-router.delete("/:id", VolunteerController.remove);
+router.delete('/:id', VolunteerController.remove)
 
-module.exports = router;
+module.exports = router

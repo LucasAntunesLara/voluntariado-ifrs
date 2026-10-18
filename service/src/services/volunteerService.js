@@ -3,7 +3,7 @@
  * @description Camada de Service para regras de negócio de voluntários.
  */
 
-const VolunteerModel = require("../models/volunteerModel");
+const VolunteerModel = require('../models/volunteerModel')
 
 class VolunteerService {
   /**
@@ -11,7 +11,7 @@ class VolunteerService {
    * @returns {Promise<Array>}
    */
   async getAllVolunteers() {
-    return await VolunteerModel.findAll();
+    return await VolunteerModel.findAll()
   }
 
   /**
@@ -19,11 +19,11 @@ class VolunteerService {
    * @returns {Promise<Array>}
    */
   async getById(id) {
-    const event = await VolunteerModel.findById(id);
+    const event = await VolunteerModel.findById(id)
 
-    if (!event) throw new Error("Voluntário não encontrado.");
+    if (!event) throw new Error('Voluntário não encontrado.')
 
-    return event;
+    return event
   }
 
   /**
@@ -33,15 +33,15 @@ class VolunteerService {
    * @throws {Error} Se faltarem campos ou se o e-mail já estiver cadastrado.
    */
   async create(volunteerData) {
-    const { name, email, phone, courseOrAffiliation } = volunteerData;
+    const {name, email, phone, courseOrAffiliation} = volunteerData
 
     if (!name || !email || !phone) {
-      throw new Error("Nome, e-mail e telefone são obrigatórios.");
+      throw new Error('Nome, e-mail e telefone são obrigatórios.')
     }
 
-    const existingVolunteer = await VolunteerModel.findByEmail(email);
+    const existingVolunteer = await VolunteerModel.findByEmail(email)
     if (existingVolunteer) {
-      throw new Error("Já existe um voluntário cadastrado com este e-mail.");
+      throw new Error('Já existe um voluntário cadastrado com este e-mail.')
     }
 
     const volunteerId = await VolunteerModel.create({
@@ -49,9 +49,9 @@ class VolunteerService {
       email,
       phone,
       courseOrAffiliation,
-    });
+    })
 
-    return await VolunteerModel.findById(volunteerId);
+    return await VolunteerModel.findById(volunteerId)
   }
 
   /**
@@ -62,19 +62,19 @@ class VolunteerService {
    * @throws {Error} Se o voluntário não for encontrado ou e-mail duplicado.
    */
   async update(id, volunteerData) {
-    const { name, email, phone, courseOrAffiliation } = volunteerData;
+    const {name, email, phone, courseOrAffiliation} = volunteerData
 
-    const existingVolunteer = await VolunteerModel.findById(id);
+    const existingVolunteer = await VolunteerModel.findById(id)
     if (!existingVolunteer) {
-      throw new Error("Voluntário não encontrado.");
+      throw new Error('Voluntário não encontrado.')
     }
 
     if (email && email !== existingVolunteer.email) {
-      const emailInUse = await VolunteerModel.findByEmail(email);
+      const emailInUse = await VolunteerModel.findByEmail(email)
       if (emailInUse) {
         throw new Error(
-          "O e-mail informado já está a ser utilizado por outro voluntário.",
-        );
+          'O e-mail informado já está a ser utilizado por outro voluntário.',
+        )
       }
     }
 
@@ -84,9 +84,9 @@ class VolunteerService {
       phone: phone || existingVolunteer.phone,
       courseOrAffiliation:
         courseOrAffiliation || existingVolunteer.course_or_affiliation,
-    });
+    })
 
-    return await VolunteerModel.findById(id);
+    return await VolunteerModel.findById(id)
   }
 
   /**
@@ -96,13 +96,13 @@ class VolunteerService {
    * @throws {Error} Se o voluntário não existir.
    */
   async delete(id) {
-    const existingVolunteer = await VolunteerModel.findById(id);
+    const existingVolunteer = await VolunteerModel.findById(id)
     if (!existingVolunteer) {
-      throw new Error("Voluntário não encontrado.");
+      throw new Error('Voluntário não encontrado.')
     }
 
-    return await VolunteerModel.delete(id);
+    return await VolunteerModel.delete(id)
   }
 }
 
-module.exports = new VolunteerService();
+module.exports = new VolunteerService()

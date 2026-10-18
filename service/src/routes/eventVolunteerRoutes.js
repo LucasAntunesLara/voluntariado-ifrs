@@ -3,14 +3,11 @@
  * @description Rotas para o gerenciamento de inscrições de voluntários em eventos.
  */
 
-const { Router } = require("express");
-const eventVolunteerController = require("../controllers/eventVolunteerController");
-const {
-  verifyToken,
-  authorizeRole,
-} = require("../middlewares/authMiddleware");
+const {Router} = require('express')
+const eventVolunteerController = require('../controllers/eventVolunteerController')
+const {verifyToken, authorizeRole} = require('../middlewares/authMiddleware')
 
-const router = Router();
+const router = Router()
 
 /**
  * @swagger
@@ -19,10 +16,7 @@ const router = Router();
  *     summary: Lista todos os voluntários inscritos em um evento
  *     tags: [EventVolunteers]
  */
-router.get(
-  "/:eventId/volunteers",
-  eventVolunteerController.listEventVolunteers,
-);
+router.get('/:eventId/volunteers', eventVolunteerController.listEventVolunteers)
 
 /**
  * @swagger
@@ -34,11 +28,11 @@ router.get(
  *       - BearerAuth: []
  */
 router.post(
-  "/:eventId/volunteers",
+  '/:eventId/volunteers',
   verifyToken,
-  authorizeRole("volunteer"),
+  authorizeRole('volunteer'),
   eventVolunteerController.register,
-);
+)
 
 /**
  * @swagger
@@ -50,10 +44,10 @@ router.post(
  *       - BearerAuth: []
  */
 router.delete(
-  "/:eventId/volunteers/:volunteerId",
+  '/:eventId/volunteers/:volunteerId',
   verifyToken,
-  authorizeRole("admin"),
+  authorizeRole('admin'),
   eventVolunteerController.unregister,
-);
+)
 
-module.exports = router;
+module.exports = router
