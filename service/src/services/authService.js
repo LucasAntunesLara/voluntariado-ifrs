@@ -2,9 +2,9 @@
  * @file authService.js
  * @description Regras de negócio para autenticação e gestão de usuárioes.
  */
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const userModel = require("../models/userModel");
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const userModel = require('../models/userModel')
 
 class AuthService {
   /**
@@ -21,10 +21,11 @@ class AuthService {
    */
   createSession(user) {
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      {id: user.id, email: user.email, role: user.role},
+      // eslint-disable-next-line
       process.env.JWT_SECRET,
-      { expiresIn: "8h" },
-    );
+      {expiresIn: '8h'},
+    )
 
     return {
       token,
@@ -34,7 +35,7 @@ class AuthService {
         email: user.email,
         role: user.role,
       },
-    };
+    }
   }
 
   /**
@@ -45,80 +46,80 @@ class AuthService {
    * @throws {Error} Se as credenciais forem inválidas.
    */
   async authenticate(email, password) {
-    const user = await userModel.findByEmail(email);
+    const user = await userModel.findByEmail(email)
     if (!user) {
-      const error = new Error("Credenciais inválidas.");
-      error.status = 401;
-      throw error;
+      const error = new Error('Credenciais inválidas.')
+      error.status = 401
+      throw error
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password)
     if (!isPasswordValid) {
-      const error = new Error("Credenciais inválidas.");
-      error.status = 401;
-      throw error;
+      const error = new Error('Credenciais inválidas.')
+      error.status = 401
+      throw error
     }
 
-    return this.createSession(user);
+    return this.createSession(user)
   }
 
   async getProfile(id) {
-    const user = await userModel.findProfileById(id);
+    const user = await userModel.findProfileById(id)
     if (!user) {
-      const error = new Error("Conta não encontrada.");
-      error.status = 404;
-      throw error;
+      const error = new Error('Conta não encontrada.')
+      error.status = 404
+      throw error
     }
-    return user;
+    return user
   }
 
-  async updateProfile(id, { name, email }) {
-    const normalizedName = name?.trim();
-    const normalizedEmail = email?.trim().toLowerCase();
+  async updateProfile(id, {name, email}) {
+    const normalizedName = name?.trim()
+    const normalizedEmail = email?.trim().toLowerCase()
 
     if (!normalizedName || !normalizedEmail) {
-      const error = new Error("Nome e e-mail são obrigatórios.");
-      error.status = 400;
-      throw error;
+      const error = new Error('Nome e e-mail são obrigatórios.')
+      error.status = 400
+      throw error
     }
     if (normalizedName.length > 100 || normalizedEmail.length > 100) {
       const error = new Error(
-        "Nome e e-mail devem ter no máximo 100 caracteres.",
-      );
-      error.status = 400;
-      throw error;
+        'Nome e e-mail devem ter no máximo 100 caracteres.',
+      )
+      error.status = 400
+      throw error
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      const error = new Error("Informe um e-mail válido.");
-      error.status = 400;
-      throw error;
+      const error = new Error('Informe um e-mail válido.')
+      error.status = 400
+      throw error
     }
 
     try {
       await userModel.updateProfile(id, {
         name: normalizedName,
         email: normalizedEmail,
-      });
+      })
     } catch (error) {
-      if (error.code === "ER_DUP_ENTRY") {
+      if (error.code === 'ER_DUP_ENTRY') {
         const conflictError = new Error(
-          "Já existe uma conta ou cadastro de voluntário com este e-mail.",
-        );
-        conflictError.status = 409;
-        throw conflictError;
+          'Já existe uma conta ou cadastro de voluntário com este e-mail.',
+        )
+        conflictError.status = 409
+        throw conflictError
       }
-      throw error;
+      throw error
     }
 
-    return this.getProfile(id);
+    return this.getProfile(id)
   }
 
   async deleteAccount(id) {
-    const deleted = await userModel.deleteAccount(id);
+    const deleted = await userModel.deleteAccount(id)
     if (!deleted) {
-      const error = new Error("Conta não encontrada.");
-      error.status = 404;
-      throw error;
+      const error = new Error('Conta não encontrada.')
+      error.status = 404
+      throw error
     }
   }
 
@@ -141,15 +142,15 @@ class AuthService {
    * @throws {Error} Repassa outros erros inesperados lançados pela camada de persistência.
    */
   async register(name, email, phone, password) {
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase()
 
     if (await userModel.findByEmail(normalizedEmail)) {
-      const error = new Error("Já existe uma conta com este e-mail.");
-      error.status = 409;
-      throw error;
+      const error = new Error('Já existe uma conta com este e-mail.')
+      error.status = 409
+      throw error
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     try {
       const user = await userModel.createVolunteer({
@@ -157,44 +158,44 @@ class AuthService {
         email: normalizedEmail,
         phone: phone.trim(),
         password: hashedPassword,
-      });
+      })
 
-      return this.createSession(user);
+      return this.createSession(user)
     } catch (error) {
-      if (error.code === "ER_DUP_ENTRY") {
-        const conflictError = new Error("Já existe uma conta com este e-mail.");
-        conflictError.status = 409;
-        throw conflictError;
+      if (error.code === 'ER_DUP_ENTRY') {
+        const conflictError = new Error('Já existe uma conta com este e-mail.')
+        conflictError.status = 409
+        throw conflictError
       }
 
-      throw error;
+      throw error
     }
   }
 
   async createAdmin(name, email, password) {
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase()
     if (await userModel.findByEmail(normalizedEmail)) {
-      const error = new Error("Já existe uma conta com este e-mail.");
-      error.status = 409;
-      throw error;
+      const error = new Error('Já existe uma conta com este e-mail.')
+      error.status = 409
+      throw error
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
     try {
       return await userModel.createAdmin({
         name: name.trim(),
         email: normalizedEmail,
         password: hashedPassword,
-      });
+      })
     } catch (error) {
-      if (error.code === "ER_DUP_ENTRY") {
-        const conflictError = new Error("Já existe uma conta com este e-mail.");
-        conflictError.status = 409;
-        throw conflictError;
+      if (error.code === 'ER_DUP_ENTRY') {
+        const conflictError = new Error('Já existe uma conta com este e-mail.')
+        conflictError.status = 409
+        throw conflictError
       }
-      throw error;
+      throw error
     }
   }
 }
 
-module.exports = new AuthService();
+module.exports = new AuthService()

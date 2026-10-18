@@ -3,7 +3,7 @@
  * @description Camada de Controller para gerenciamento de requisições de voluntários.
  */
 
-const VolunteerService = require("../services/VolunteerService");
+const VolunteerService = require('../services/VolunteerService')
 
 class VolunteerController {
   /**
@@ -13,10 +13,10 @@ class VolunteerController {
    */
   async getAll(req, res) {
     try {
-      const volunteers = await VolunteerService.getAllVolunteers();
-      return res.status(200).json(volunteers);
+      const volunteers = await VolunteerService.getAllVolunteers()
+      return res.status(200).json(volunteers)
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({error: error.message})
     }
   }
 
@@ -27,12 +27,12 @@ class VolunteerController {
    */
   async getById(req, res) {
     try {
-      const id = req.params.id;
+      const id = req.params.id
 
-      const volunteer = await VolunteerService.getById(id);
-      res.json(volunteer);
+      const volunteer = await VolunteerService.getById(id)
+      res.json(volunteer)
     } catch (error) {
-      res.status(error.status || 404).json({ error: error.message });
+      res.status(error.status || 404).json({error: error.message})
     }
   }
 
@@ -43,10 +43,10 @@ class VolunteerController {
    */
   async create(req, res) {
     try {
-      const newVolunteer = await VolunteerService.create(req.body);
-      return res.status(201).json(newVolunteer);
+      const newVolunteer = await VolunteerService.create(req.body)
+      return res.status(201).json(newVolunteer)
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      return res.status(400).json({error: error.message})
     }
   }
 
@@ -57,11 +57,11 @@ class VolunteerController {
    */
   async update(req, res) {
     try {
-      const { id } = req.params;
-      const updatedVolunteer = await VolunteerService.update(id, req.body);
-      return res.status(200).json(updatedVolunteer);
+      const {id} = req.params
+      const updatedVolunteer = await VolunteerService.update(id, req.body)
+      return res.status(200).json(updatedVolunteer)
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      return res.status(400).json({error: error.message})
     }
   }
 
@@ -72,13 +72,13 @@ class VolunteerController {
    */
   async remove(req, res) {
     try {
-      const { id } = req.params;
-      await VolunteerService.delete(id);
-      return res.status(204).send();
+      const {id} = req.params
+      await VolunteerService.delete(id)
+      return res.status(204).send()
     } catch (error) {
-      return res.status(404).json({ error: error.message });
+      return res.status(404).json({error: error.message})
     }
   }
 }
 
-module.exports = new VolunteerController();
+module.exports = new VolunteerController()

@@ -1,72 +1,72 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import {useState} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
+import {useForm} from 'react-hook-form'
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {Button} from '@/components/ui/button'
+import {Card, CardContent} from '@/components/ui/card'
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/useAuth";
-import api from "@/services/api";
-import Header from "@/components/layout/header";
+} from '@/components/ui/field'
+import {Input} from '@/components/ui/input'
+import {useAuth} from '@/contexts/useAuth'
+import api from '@/services/api'
+import Header from '@/components/layout/header'
 
-const formatPhone = (value) => {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
+const formatPhone = value => {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
 
-  if (digits.length <= 2) return digits ? `(${digits}` : "";
+  if (digits.length <= 2) return digits ? `(${digits}` : ''
 
-  const areaCode = digits.slice(0, 2);
-  const number = digits.slice(2);
+  const areaCode = digits.slice(0, 2)
+  const number = digits.slice(2)
 
-  if (number.length <= 5) return `(${areaCode}) ${number}`;
-  return `(${areaCode}) ${number.slice(0, 5)}-${number.slice(5)}`;
-};
+  if (number.length <= 5) return `(${areaCode}) ${number}`
+  return `(${areaCode}) ${number.slice(0, 5)}-${number.slice(5)}`
+}
 
 export default function Register() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [submitError, setSubmitError] = useState("");
+  const navigate = useNavigate()
+  const {login} = useAuth()
+  const [submitError, setSubmitError] = useState('')
   const {
     register,
     handleSubmit,
     getValues,
-    formState: { errors, isSubmitting },
-  } = useForm();
-  const phoneField = register("phone", {
-    required: "Informe seu telefone.",
-  });
+    formState: {errors, isSubmitting},
+  } = useForm()
+  const phoneField = register('phone', {
+    required: 'Informe seu telefone.',
+  })
 
-  const onSubmit = async ({ name, email, phone, password }) => {
-    setSubmitError("");
+  const onSubmit = async ({name, email, phone, password}) => {
+    setSubmitError('')
 
     try {
-      const { data } = await api.post("/auth/register", {
+      const {data} = await api.post('/auth/register', {
         name,
         email,
         phone,
         password,
-      });
+      })
 
       if (!data?.token) {
-        throw new Error("O servidor não retornou um token de autenticação.");
+        throw new Error('O servidor não retornou um token de autenticação.')
       }
 
-      login(data.token, data.user);
-      navigate("/", { replace: true });
+      login(data.token, data.user)
+      navigate('/', {replace: true})
     } catch (error) {
       setSubmitError(
         error?.response?.data?.error ||
           error?.message ||
-          "Não foi possível criar sua conta. Tente novamente.",
-      );
+          'Não foi possível criar sua conta. Tente novamente.',
+      )
     }
-  };
+  }
 
   return (
     <>
@@ -78,8 +78,7 @@ export default function Register() {
               <form
                 className="p-6 md:p-8"
                 onSubmit={handleSubmit(onSubmit)}
-                noValidate
-              >
+                noValidate>
                 <FieldGroup>
                   <div className="flex flex-col items-center gap-2 text-center">
                     <h1 className="text-2xl font-bold">Crie sua conta</h1>
@@ -94,12 +93,12 @@ export default function Register() {
                       type="text"
                       autoComplete="name"
                       aria-invalid={Boolean(errors.name)}
-                      aria-describedby={errors.name ? "name-error" : undefined}
-                      {...register("name", {
-                        required: "Informe seu nome.",
+                      aria-describedby={errors.name ? 'name-error' : undefined}
+                      {...register('name', {
+                        required: 'Informe seu nome.',
                         maxLength: {
                           value: 100,
-                          message: "O nome deve ter no máximo 100 caracteres.",
+                          message: 'O nome deve ter no máximo 100 caracteres.',
                         },
                       })}
                     />
@@ -118,18 +117,18 @@ export default function Register() {
                       autoComplete="email"
                       aria-invalid={Boolean(errors.email)}
                       aria-describedby={
-                        errors.email ? "email-error" : undefined
+                        errors.email ? 'email-error' : undefined
                       }
-                      {...register("email", {
-                        required: "Informe seu e-mail.",
+                      {...register('email', {
+                        required: 'Informe seu e-mail.',
                         pattern: {
                           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Informe um e-mail válido.",
+                          message: 'Informe um e-mail válido.',
                         },
                         maxLength: {
                           value: 100,
                           message:
-                            "O e-mail deve ter no máximo 100 caracteres.",
+                            'O e-mail deve ter no máximo 100 caracteres.',
                         },
                       })}
                     />
@@ -148,12 +147,12 @@ export default function Register() {
                       autoComplete="tel"
                       aria-invalid={Boolean(errors.phone)}
                       aria-describedby={
-                        errors.phone ? "phone-error" : undefined
+                        errors.phone ? 'phone-error' : undefined
                       }
                       {...phoneField}
-                      onChange={(event) => {
-                        event.target.value = formatPhone(event.target.value);
-                        phoneField.onChange(event);
+                      onChange={event => {
+                        event.target.value = formatPhone(event.target.value)
+                        phoneField.onChange(event)
                       }}
                     />
                     <FieldError
@@ -171,14 +170,14 @@ export default function Register() {
                         autoComplete="new-password"
                         aria-invalid={Boolean(errors.password)}
                         aria-describedby={
-                          errors.password ? "password-error" : undefined
+                          errors.password ? 'password-error' : undefined
                         }
-                        {...register("password", {
-                          required: "Informe uma senha.",
+                        {...register('password', {
+                          required: 'Informe uma senha.',
                           minLength: {
                             value: 8,
                             message:
-                              "A senha deve ter pelo menos 8 caracteres.",
+                              'A senha deve ter pelo menos 8 caracteres.',
                           },
                         })}
                       />
@@ -199,14 +198,14 @@ export default function Register() {
                         aria-invalid={Boolean(errors.confirmPassword)}
                         aria-describedby={
                           errors.confirmPassword
-                            ? "confirm-password-error"
+                            ? 'confirm-password-error'
                             : undefined
                         }
-                        {...register("confirmPassword", {
-                          required: "Confirme sua senha.",
-                          validate: (value) =>
-                            value === getValues("password") ||
-                            "As senhas não coincidem.",
+                        {...register('confirmPassword', {
+                          required: 'Confirme sua senha.',
+                          validate: value =>
+                            value === getValues('password') ||
+                            'As senhas não coincidem.',
                         })}
                       />
                       <FieldError
@@ -225,9 +224,8 @@ export default function Register() {
                     <Button
                       type="submit"
                       className="bg-emerald-700 text-white hover:bg-emerald-800"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Criando conta..." : "Criar conta"}
+                      disabled={isSubmitting}>
+                      {isSubmitting ? 'Criando conta...' : 'Criar conta'}
                     </Button>
                   </Field>
                   <FieldDescription className="text-center">
@@ -247,5 +245,5 @@ export default function Register() {
         </div>
       </main>
     </>
-  );
+  )
 }

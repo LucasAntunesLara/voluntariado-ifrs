@@ -3,7 +3,7 @@
  * @description Camada de Model para operações de voluntários no MySQL.
  */
 
-const db = require("../config/database");
+const db = require('../config/database')
 
 class VolunteerModel {
   /**
@@ -20,7 +20,7 @@ class VolunteerModel {
          ON v.user_id = u.id OR (v.user_id IS NULL AND v.email = u.email)
        WHERE u.role = 'volunteer'
        ORDER BY u.name ASC`,
-    );
+    )
 
     const [registrations] = await db.query(
       `SELECT COALESCE(ev.user_id, v.user_id) AS userId,
@@ -36,23 +36,24 @@ class VolunteerModel {
              AND u.role = 'volunteer'
          )
        ORDER BY ev.registered_at DESC`,
-    );
+    )
 
-    const registrationsByUser = new Map();
+    const registrationsByUser = new Map()
     for (const registration of registrations) {
-      const userRegistrations = registrationsByUser.get(registration.userId) || [];
+      const userRegistrations =
+        registrationsByUser.get(registration.userId) || []
       userRegistrations.push({
         eventTitle: registration.eventTitle,
         status: registration.status,
         registeredAt: registration.registeredAt,
-      });
-      registrationsByUser.set(registration.userId, userRegistrations);
+      })
+      registrationsByUser.set(registration.userId, userRegistrations)
     }
 
-    return volunteers.map((volunteer) => ({
+    return volunteers.map(volunteer => ({
       ...volunteer,
       events: registrationsByUser.get(volunteer.id) || [],
-    }));
+    }))
   }
 
   /**
@@ -62,10 +63,10 @@ class VolunteerModel {
    */
   async findById(id) {
     const [rows] = await db.query(
-      "SELECT id, name, email, phone, course_or_affiliation, created_at FROM volunteers WHERE id = ?",
+      'SELECT id, name, email, phone, course_or_affiliation, created_at FROM volunteers WHERE id = ?',
       [id],
-    );
-    return rows[0] || null;
+    )
+    return rows[0] || null
   }
 
   /**
@@ -75,10 +76,10 @@ class VolunteerModel {
    */
   async findByEmail(email) {
     const [rows] = await db.query(
-      "SELECT id, name, email, phone, course_or_affiliation, created_at FROM volunteers WHERE email = ?",
+      'SELECT id, name, email, phone, course_or_affiliation, created_at FROM volunteers WHERE email = ?',
       [email],
-    );
-    return rows[0] || null;
+    )
+    return rows[0] || null
   }
 
   /**
@@ -86,12 +87,12 @@ class VolunteerModel {
    * @param {Object} volunteerData - Dados do voluntário.
    * @returns {Promise<number>} ID do voluntário criado.
    */
-  async create({ name, email, phone, courseOrAffiliation }) {
+  async create({name, email, phone, courseOrAffiliation}) {
     const [result] = await db.query(
-      "INSERT INTO volunteers (name, email, phone, course_or_affiliation) VALUES (?, ?, ?, ?)",
-      [name, email, phone, courseOrAffiliation || "Comunidade Externa"],
-    );
-    return result.insertId;
+      'INSERT INTO volunteers (name, email, phone, course_or_affiliation) VALUES (?, ?, ?, ?)',
+      [name, email, phone, courseOrAffiliation || 'Comunidade Externa'],
+    )
+    return result.insertId
   }
 
   /**
@@ -100,12 +101,12 @@ class VolunteerModel {
    * @param {Object} volunteerData - Novos dados do voluntário.
    * @returns {Promise<boolean>} True se atualizado com sucesso.
    */
-  async update(id, { name, email, phone, courseOrAffiliation }) {
+  async update(id, {name, email, phone, courseOrAffiliation}) {
     const [result] = await db.query(
-      "UPDATE volunteers SET name = ?, email = ?, phone = ?, course_or_affiliation = ? WHERE id = ?",
+      'UPDATE volunteers SET name = ?, email = ?, phone = ?, course_or_affiliation = ? WHERE id = ?',
       [name, email, phone, courseOrAffiliation, id],
-    );
-    return result.affectedRows > 0;
+    )
+    return result.affectedRows > 0
   }
 
   /**
@@ -114,11 +115,9 @@ class VolunteerModel {
    * @returns {Promise<boolean>} True se eliminado com sucesso.
    */
   async delete(id) {
-    const [result] = await db.query("DELETE FROM volunteers WHERE id = ?", [
-      id,
-    ]);
-    return result.affectedRows > 0;
+    const [result] = await db.query('DELETE FROM volunteers WHERE id = ?', [id])
+    return result.affectedRows > 0
   }
 }
 
-module.exports = new VolunteerModel();
+module.exports = new VolunteerModel()

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --primary: oklch(0.205 0 0);
@@ -36,16 +36,15 @@
   --black: oklch(0.21 0.006 285.885);
   --white: #fff;
   --muted-white-1: lab(96.52 -0.0000298023 0.0000119209);
-  --muted-white-2: #E5E5E5;
+  --muted-white-2: #e5e5e5;
   --border-light: lab(90.952 0 -0.0000119209);
   --foreground: oklch(21% 0.006 285.885);
-  --green-main: #40A14C;
+  --green-main: #40a14c;
   --green-dark: #007736;
   --text-primary: var(--black);
   --text-foreground: #656565;
   --red-1: #c21c22;
-  --shadow-xl: 0 20px 25px -5px #0000001a,
-  0 8px 10px -6px #0000001a;
+  --shadow-xl: 0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a;
 
   --radius-button: 10px;
   --border-1: solid 1px lab(90.952 0 -0.0000119209);

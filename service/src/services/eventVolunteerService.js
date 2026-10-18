@@ -3,39 +3,39 @@
  * @description Camada de Service para regras de negócio de inscrições em eventos.
  */
 
-const eventVolunteerModel = require("../models/eventVolunteerModel");
-const eventModel = require("../models/eventModel");
+const eventVolunteerModel = require('../models/eventVolunteerModel')
+const eventModel = require('../models/eventModel')
 
 class EventVolunteerService {
   async requestParticipation(eventId, userId) {
-    return await eventVolunteerModel.createRequest(eventId, userId);
+    return await eventVolunteerModel.createRequest(eventId, userId)
   }
 
   async reviewRequest(requestId, decision) {
-    if (!["approved", "rejected"].includes(decision)) {
-      const error = new Error("A decisão deve ser 'approved' ou 'rejected'.");
-      error.status = 400;
-      throw error;
+    if (!['approved', 'rejected'].includes(decision)) {
+      const error = new Error("A decisão deve ser 'approved' ou 'rejected'.")
+      error.status = 400
+      throw error
     }
 
-    const result = await eventVolunteerModel.reviewRequest(requestId, decision);
+    const result = await eventVolunteerModel.reviewRequest(requestId, decision)
     if (result.capacityRejected) {
       const error = new Error(
-        "As vagas foram preenchidas. A solicitação foi recusada automaticamente.",
-      );
-      error.status = 409;
-      error.request = result;
-      throw error;
+        'As vagas foram preenchidas. A solicitação foi recusada automaticamente.',
+      )
+      error.status = 409
+      error.request = result
+      throw error
     }
-    return result;
+    return result
   }
 
   async getRequestsForAdmin() {
-    return await eventVolunteerModel.findRequestsForAdmin();
+    return await eventVolunteerModel.findRequestsForAdmin()
   }
 
   async getRequestsByUser(userId) {
-    return await eventVolunteerModel.findRequestsByUser(userId);
+    return await eventVolunteerModel.findRequestsByUser(userId)
   }
 
   /**
@@ -47,14 +47,14 @@ class EventVolunteerService {
    */
   async unregisterVolunteer(eventId, volunteerId) {
     const existingRegistration =
-      await eventVolunteerModel.findByEventAndVolunteer(eventId, volunteerId);
+      await eventVolunteerModel.findByEventAndVolunteer(eventId, volunteerId)
     if (!existingRegistration) {
       throw new Error(
-        "Inscrição não encontrada para este voluntário neste evento.",
-      );
+        'Inscrição não encontrada para este voluntário neste evento.',
+      )
     }
 
-    return await eventVolunteerModel.delete(eventId, volunteerId);
+    return await eventVolunteerModel.delete(eventId, volunteerId)
   }
 
   /**
@@ -64,13 +64,13 @@ class EventVolunteerService {
    * @throws {Error} Se o evento não existir.
    */
   async getVolunteersOfEvent(eventId) {
-    const event = await eventModel.findById(eventId);
+    const event = await eventModel.findById(eventId)
     if (!event) {
-      throw new Error("Evento não encontrado.");
+      throw new Error('Evento não encontrado.')
     }
 
-    return await eventVolunteerModel.findVolunteersByEvent(eventId);
+    return await eventVolunteerModel.findVolunteersByEvent(eventId)
   }
 }
 
-module.exports = new EventVolunteerService();
+module.exports = new EventVolunteerService()

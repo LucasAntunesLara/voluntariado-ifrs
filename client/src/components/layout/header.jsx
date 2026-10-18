@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import {Button} from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,26 +7,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu'
 import {
   Calendar,
   PlusCircle,
   LogOut,
   PersonStanding,
   ArrowRightIcon,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/useAuth";
+} from 'lucide-react'
+import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar'
+import {Link, useNavigate} from 'react-router-dom'
+import {useAuth} from '@/contexts/useAuth'
 
 const Header = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const {user, logout} = useAuth()
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout();
-    navigate("/login", { replace: true });
-  };
+    logout()
+    navigate('/login', {replace: true})
+  }
 
   return (
     <header className="flex flex-row justify-between items-center px-12 gap-x-4 h-16 bg-background text-gray-500 border border-b-gray-200 min-w-screen max-w-available">
@@ -40,7 +40,7 @@ const Header = () => {
       <nav className="flex items-center gap-4">
         {user && (
           <>
-            {user.role === "admin" && (
+            {user.role === 'admin' && (
               <Button asChild variant="ghost" size="lg" className="gap-2">
                 <a href="/voluntarios" className="flex items-center gap-1">
                   <PersonStanding className="h-4 w-4" />
@@ -56,12 +56,11 @@ const Header = () => {
               </a>
             </Button>
 
-            {user.role === "admin" && (
+            {user.role === 'admin' && (
               <Button
                 asChild
                 size="lg"
-                className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white flex rounded-full"
-              >
+                className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white flex rounded-full">
                 <a href="/eventos/novo" className="flex items-center gap-1">
                   <PlusCircle className="h-4 w-4" />
                   <span>Novo Evento</span>
@@ -89,7 +88,7 @@ const Header = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <p className="text-xs text-muted-foreground capitalize">
-                      Permissão:{" "}
+                      Permissão:{' '}
                       <span className="font-semibold text-emerald-700">
                         {user.role}
                       </span>
@@ -100,8 +99,7 @@ const Header = () => {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-red-600 focus:bg-red-50 focus:text-red-600 cursor-pointer"
-                  >
+                    className="text-red-600 focus:bg-red-50 focus:text-red-600 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Sair da conta</span>
                   </DropdownMenuItem>
@@ -120,8 +118,7 @@ const Header = () => {
             <Button
               asChild
               size="lg"
-              className="bg-emerald-700 hover:bg-emerald-800"
-            >
+              className="bg-emerald-700 hover:bg-emerald-800">
               <Link to="/login" className="flex items-center gap-1">
                 Entrar
                 <ArrowRightIcon />
@@ -131,7 +128,7 @@ const Header = () => {
         )}
       </nav>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

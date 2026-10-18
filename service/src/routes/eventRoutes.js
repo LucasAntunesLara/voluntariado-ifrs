@@ -3,11 +3,11 @@
  * @description Rotas para o gerenciamento de eventos
  */
 
-const { Router } = require("express");
-const EventController = require("../controllers/eventController");
-const { verifyToken, authorizeRole } = require("../middlewares/authMiddleware");
+const {Router} = require('express')
+const EventController = require('../controllers/eventController')
+const {verifyToken, authorizeRole} = require('../middlewares/authMiddleware')
 
-const router = Router();
+const router = Router()
 
 /**
  * @swagger
@@ -34,7 +34,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor.
  */
-router.get("/", EventController.getAll);
+router.get('/', EventController.getAll)
 
 /**
  * @swagger
@@ -59,7 +59,7 @@ router.get("/", EventController.getAll);
  *       404:
  *         description: Evento não encontrado.
  */
-router.get("/:id", EventController.getById);
+router.get('/:id', EventController.getById)
 
 /**
  * @swagger
@@ -94,7 +94,7 @@ router.get("/:id", EventController.getById);
  *       400:
  *         description: Dados inválidos.
  */
-router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
+router.post('/', verifyToken, authorizeRole('admin'), EventController.create)
 
 /**
  * @swagger
@@ -136,12 +136,7 @@ router.post("/", verifyToken, authorizeRole("admin"), EventController.create);
  *       404:
  *         description: Evento não encontrado.
  */
-router.put(
-  "/:id",
-  verifyToken,
-  authorizeRole("admin"),
-  EventController.update,
-);
+router.put('/:id', verifyToken, authorizeRole('admin'), EventController.update)
 
 /**
  * @swagger
@@ -176,10 +171,10 @@ router.put(
  *         description: Evento não encontrado.
  */
 router.delete(
-  "/:id",
+  '/:id',
   verifyToken,
-  authorizeRole("admin"),
+  authorizeRole('admin'),
   EventController.delete,
-);
+)
 
-module.exports = router;
+module.exports = router

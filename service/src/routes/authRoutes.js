@@ -3,11 +3,11 @@
  * @description Rotas para autenticação de usuários, geração de token JWT e rota protegida do dashboard.
  */
 
-const { Router } = require("express");
-const { verifyToken } = require("../middlewares/authMiddleware");
-const authController = require("../controllers/authController");
+const {Router} = require('express')
+const {verifyToken} = require('../middlewares/authMiddleware')
+const authController = require('../controllers/authController')
 
-const router = Router();
+const router = Router()
 
 /**
  * @swagger
@@ -32,7 +32,7 @@ const router = Router();
  *       401:
  *         description: Credenciais inválidas.
  */
-router.post("/login", (req, res) => authController.login(req, res));
+router.post('/login', (req, res) => authController.login(req, res))
 
 /**
  * @swagger
@@ -67,16 +67,16 @@ router.post("/login", (req, res) => authController.login(req, res));
  *       409:
  *         description: Já existe uma conta com este e-mail.
  */
-router.post("/register", (req, res) => authController.register(req, res));
+router.post('/register', (req, res) => authController.register(req, res))
 
-router.get("/me", verifyToken, (req, res) =>
+router.get('/me', verifyToken, (req, res) =>
   authController.getProfile(req, res),
-);
-router.patch("/me", verifyToken, (req, res) =>
+)
+router.patch('/me', verifyToken, (req, res) =>
   authController.updateProfile(req, res),
-);
-router.delete("/me", verifyToken, (req, res) =>
+)
+router.delete('/me', verifyToken, (req, res) =>
   authController.deleteAccount(req, res),
-);
+)
 
-module.exports = router;
+module.exports = router

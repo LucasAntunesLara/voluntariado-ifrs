@@ -3,15 +3,12 @@
  * @description Rotas para autenticação de usuários, geração de token JWT e rota protegida do dashboard.
  */
 
-const { Router } = require("express");
-const {
-  verifyToken,
-  authorizeRole,
-} = require("../middlewares/authMiddleware");
-const eventVolunteerController = require("../controllers/eventVolunteerController");
-const authController = require("../controllers/authController");
+const {Router} = require('express')
+const {verifyToken, authorizeRole} = require('../middlewares/authMiddleware')
+const eventVolunteerController = require('../controllers/eventVolunteerController')
+const authController = require('../controllers/authController')
 
-const router = Router();
+const router = Router()
 
 /**
  * @swagger
@@ -27,29 +24,29 @@ const router = Router();
  *       401:
  *         description: Token ausente ou inválido.
  */
-router.get("/", verifyToken, authController.getDashboard);
+router.get('/', verifyToken, authController.getDashboard)
 router.post(
-  "/admins",
+  '/admins',
   verifyToken,
-  authorizeRole("admin"),
+  authorizeRole('admin'),
   authController.createAdmin,
-);
+)
 router.get(
-  "/participation-requests",
+  '/participation-requests',
   verifyToken,
-  authorizeRole("admin"),
+  authorizeRole('admin'),
   eventVolunteerController.listAdminRequests,
-);
+)
 router.get(
-  "/my-participation-requests",
+  '/my-participation-requests',
   verifyToken,
   eventVolunteerController.listMyRequests,
-);
+)
 router.patch(
-  "/participation-requests/:requestId",
+  '/participation-requests/:requestId',
   verifyToken,
-  authorizeRole("admin"),
+  authorizeRole('admin'),
   eventVolunteerController.reviewRequest,
-);
+)
 
-module.exports = router;
+module.exports = router
