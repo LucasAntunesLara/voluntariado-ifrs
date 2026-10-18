@@ -27,6 +27,15 @@ const swaggerOptions = {
       description:
         'Documentação da API do sistema de voluntariado do IFRS Campus Bento Gonçalves',
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
     servers: [
       {
         url: 'http://localhost:3000',

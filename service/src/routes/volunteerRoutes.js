@@ -20,8 +20,10 @@ const router = Router()
  * @swagger
  * /volunteers:
  *   get:
- *     summary: Retorna a lista de todos os voluntários
+ *     summary: Retorna a lista de voluntários (apenas administradores)
  *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de voluntários retornada com sucesso.
@@ -40,8 +42,10 @@ router.get('/', verifyToken, authorizeRole('admin'), VolunteerController.getAll)
  * @swagger
  * /volunteers/{id}:
  *   get:
- *     summary: Retorna um voluntário pelo ID
+ *     summary: Retorna um voluntário pelo ID (apenas administradores)
  *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -59,14 +63,21 @@ router.get('/', verifyToken, authorizeRole('admin'), VolunteerController.getAll)
  *       404:
  *         description: voluntário não encontrado.
  */
-router.get('/:id', VolunteerController.getById)
+router.get(
+  '/:id',
+  verifyToken,
+  authorizeRole('admin'),
+  VolunteerController.getById,
+)
 
 /**
  * @swagger
  * /volunteers:
  *   post:
- *     summary: Cria um novo voluntário
+ *     summary: Cria um cadastro de voluntário (apenas administradores)
  *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -74,11 +85,20 @@ router.get('/:id', VolunteerController.getById)
  *             schema:
  *               type: object
  *               required:
- *                 - title
+ *                 - name
+ *                 - email
+ *                 - phone
  *               properties:
- *                 title:
+ *                 name:
  *                   type: string
- *                   description: Título do voluntário
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                 phone:
+ *                   type: string
+ *                 courseOrAffiliation:
+ *                   type: string
+ *                   description: Curso ou vínculo do voluntário
  *     responses:
  *       201:
  *         description: voluntário criado com sucesso.
@@ -94,14 +114,21 @@ router.get('/:id', VolunteerController.getById)
  *       400:
  *         description: Dados inválidos.
  */
-router.post('/', VolunteerController.create)
+router.post(
+  '/',
+  verifyToken,
+  authorizeRole('admin'),
+  VolunteerController.create,
+)
 
 /**
  * @swagger
  * /volunteers/{id}:
  *   put:
- *     summary: Atualiza um voluntário existente
+ *     summary: Atualiza um cadastro de voluntário (apenas administradores)
  *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -128,14 +155,21 @@ router.post('/', VolunteerController.create)
  *       400:
  *         description: Dados inválidos ou erro na atualização.
  */
-router.put('/:id', VolunteerController.update)
+router.put(
+  '/:id',
+  verifyToken,
+  authorizeRole('admin'),
+  VolunteerController.update,
+)
 
 /**
  * @swagger
  * /volunteers/{id}:
  *   delete:
- *     summary: Remove um voluntário pelo ID
+ *     summary: Remove um cadastro de voluntário (apenas administradores)
  *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -144,18 +178,16 @@ router.put('/:id', VolunteerController.update)
  *           type: string
  *         description: ID do voluntário
  *     responses:
- *       200:
- *         description: voluntário deletado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *       204:
+ *         description: Voluntário removido com sucesso.
  *       500:
  *         description: Erro interno ao deletar o voluntário.
  */
-router.delete('/:id', VolunteerController.remove)
+router.delete(
+  '/:id',
+  verifyToken,
+  authorizeRole('admin'),
+  VolunteerController.remove,
+)
 
 module.exports = router
