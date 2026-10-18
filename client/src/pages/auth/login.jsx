@@ -1,5 +1,5 @@
-import Header from "@/components/layout/header";
-import { LoginForm } from "@/components/login-form";
+import Header from '@/components/layout/header'
+import {LoginForm} from '@/components/login-form'
 
 const Login = () => {
   return (
@@ -11,7 +11,7 @@ const Login = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

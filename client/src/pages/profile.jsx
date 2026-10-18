@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import {
   CalendarDays,
   Check,
@@ -9,107 +9,107 @@ import {
   Trash2,
   UserRound,
   X,
-} from "lucide-react";
-import Header from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/useAuth";
-import api from "@/services/api";
+} from 'lucide-react'
+import Header from '@/components/layout/header'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {useAuth} from '@/contexts/useAuth'
+import api from '@/services/api'
 
 const roleLabels = {
-  admin: "Administrador",
-  volunteer: "Voluntário",
-};
+  admin: 'Administrador',
+  volunteer: 'Voluntário',
+}
 
 export default function Profile() {
-  const { user, updateUser, logout } = useAuth();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "" });
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const {user, updateUser, logout} = useAuth()
+  const navigate = useNavigate()
+  const [profile, setProfile] = useState(null)
+  const [form, setForm] = useState({name: '', email: ''})
+  const [editing, setEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const { data } = await api.get("/auth/me");
-        setProfile(data);
-        setForm({ name: data.name, email: data.email });
+        const {data} = await api.get('/auth/me')
+        setProfile(data)
+        setForm({name: data.name, email: data.email})
       } catch (loadError) {
         setError(
           loadError?.response?.data?.error ||
-            "Não foi possível carregar os dados da conta.",
-        );
+            'Não foi possível carregar os dados da conta.',
+        )
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadProfile();
-  }, []);
+    loadProfile()
+  }, [])
 
-  const updateField = (event) => {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
-  };
+  const updateField = event => {
+    setForm(current => ({...current, [event.target.name]: event.target.value}))
+  }
 
   const cancelEditing = () => {
-    setForm({ name: profile.name, email: profile.email });
-    setEditing(false);
-    setError("");
-    setNotice("");
-  };
+    setForm({name: profile.name, email: profile.email})
+    setEditing(false)
+    setError('')
+    setNotice('')
+  }
 
-  const saveProfile = async (event) => {
-    event.preventDefault();
-    setSaving(true);
-    setError("");
-    setNotice("");
+  const saveProfile = async event => {
+    event.preventDefault()
+    setSaving(true)
+    setError('')
+    setNotice('')
 
     try {
-      const { data } = await api.patch("/auth/me", form);
-      setProfile(data);
-      setForm({ name: data.name, email: data.email });
-      updateUser({ ...user, name: data.name, email: data.email });
-      setEditing(false);
-      setNotice("Seus dados foram atualizados.");
+      const {data} = await api.patch('/auth/me', form)
+      setProfile(data)
+      setForm({name: data.name, email: data.email})
+      updateUser({...user, name: data.name, email: data.email})
+      setEditing(false)
+      setNotice('Seus dados foram atualizados.')
     } catch (saveError) {
       setError(
         saveError?.response?.data?.error ||
-          "Não foi possível atualizar seus dados.",
-      );
+          'Não foi possível atualizar seus dados.',
+      )
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const deleteAccount = async () => {
     const confirmed = window.confirm(
-      "Tem certeza de que deseja excluir sua conta? Essa ação é permanente e não pode ser desfeita.",
-    );
-    if (!confirmed) return;
+      'Tem certeza de que deseja excluir sua conta? Essa ação é permanente e não pode ser desfeita.',
+    )
+    if (!confirmed) return
 
-    setDeleting(true);
-    setError("");
+    setDeleting(true)
+    setError('')
     try {
-      await api.delete("/auth/me");
-      logout();
-      navigate("/cadastro", { replace: true });
+      await api.delete('/auth/me')
+      logout()
+      navigate('/cadastro', {replace: true})
     } catch (deleteError) {
       setError(
         deleteError?.response?.data?.error ||
-          "Não foi possível excluir sua conta.",
-      );
-      setDeleting(false);
+          'Não foi possível excluir sua conta.',
+      )
+      setDeleting(false)
     }
-  };
+  }
 
-  const initials = (profile?.name || user?.name || user?.email || "?")
+  const initials = (profile?.name || user?.name || user?.email || '?')
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase()
 
   return (
     <>
@@ -131,16 +131,14 @@ export default function Profile() {
           {error && (
             <p
               className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-              role="alert"
-            >
+              role="alert">
               {error}
             </p>
           )}
           {notice && (
             <p
               className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
-              role="status"
-            >
+              role="status">
               {notice}
             </p>
           )}
@@ -148,22 +146,19 @@ export default function Profile() {
           {loading ? (
             <div
               className="rounded-xl border bg-white p-8 text-center text-gray-600 shadow-sm"
-              role="status"
-            >
+              role="status">
               Carregando seus dados...
             </div>
           ) : profile ? (
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
               <form
                 onSubmit={saveProfile}
-                className="rounded-xl border border-gray-200 bg-white shadow-sm"
-              >
+                className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 p-6">
                   <div className="flex items-center gap-4">
                     <div
                       className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-800"
-                      aria-hidden="true"
-                    >
+                      aria-hidden="true">
                       {initials}
                     </div>
                     <div>
@@ -180,11 +175,10 @@ export default function Profile() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setEditing(true);
-                        setNotice("");
-                        setError("");
-                      }}
-                    >
+                        setEditing(true)
+                        setNotice('')
+                        setError('')
+                      }}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Editar dados
                     </Button>
@@ -195,8 +189,7 @@ export default function Profile() {
                   <div className="space-y-2">
                     <label
                       htmlFor="profile-name"
-                      className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                    >
+                      className="flex items-center gap-2 text-sm font-medium text-gray-700">
                       <UserRound className="h-4 w-4 text-gray-400" />
                       Nome completo
                     </label>
@@ -216,8 +209,7 @@ export default function Profile() {
                   <div className="space-y-2">
                     <label
                       htmlFor="profile-email"
-                      className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                    >
+                      className="flex items-center gap-2 text-sm font-medium text-gray-700">
                       <Mail className="h-4 w-4 text-gray-400" />
                       E-mail
                     </label>
@@ -241,18 +233,16 @@ export default function Profile() {
                         type="button"
                         variant="outline"
                         onClick={cancelEditing}
-                        disabled={saving}
-                      >
+                        disabled={saving}>
                         <X className="mr-2 h-4 w-4" />
                         Cancelar
                       </Button>
                       <Button
                         type="submit"
                         disabled={saving}
-                        className="bg-emerald-700 text-white hover:bg-emerald-800"
-                      >
+                        className="bg-emerald-700 text-white hover:bg-emerald-800">
                         <Check className="mr-2 h-4 w-4" />
-                        {saving ? "Salvando..." : "Salvar alterações"}
+                        {saving ? 'Salvando...' : 'Salvar alterações'}
                       </Button>
                     </div>
                   )}
@@ -280,7 +270,7 @@ export default function Profile() {
                         <dt className="text-gray-500">Membro desde</dt>
                         <dd className="font-medium text-gray-900">
                           {new Date(profile.createdAt).toLocaleDateString(
-                            "pt-BR",
+                            'pt-BR',
                           )}
                         </dd>
                       </div>
@@ -289,9 +279,7 @@ export default function Profile() {
                 </section>
 
                 <section className="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
-                  <h2 className="font-semibold text-gray-900">
-                    Excluir conta
-                  </h2>
+                  <h2 className="font-semibold text-gray-900">Excluir conta</h2>
                   <p className="mt-2 text-sm leading-6 text-gray-600">
                     A exclusão é permanente e remove seu acesso e seus dados
                     associados.
@@ -301,10 +289,9 @@ export default function Profile() {
                     variant="destructive"
                     className="mt-5 w-full"
                     onClick={deleteAccount}
-                    disabled={deleting}
-                  >
+                    disabled={deleting}>
                     <Trash2 className="mr-2 h-4 w-4" />
-                    {deleting ? "Excluindo conta..." : "Excluir minha conta"}
+                    {deleting ? 'Excluindo conta...' : 'Excluir minha conta'}
                   </Button>
                 </section>
               </aside>
@@ -318,5 +305,5 @@ export default function Profile() {
         </section>
       </main>
     </>
-  );
+  )
 }
