@@ -12,47 +12,59 @@ class VolunteerModel {
    */
   async findAll() {
     const [volunteers] = await db.query(
-      `SELECT u.id, u.name, u.email, u.role, u.created_at AS createdAt,
-              v.id AS volunteerId, v.phone,
+      `SELECT v.id, v.id AS volunteerId, u.id AS userId,
+              v.name, v.email, u.role, v.created_at AS createdAt, v.phone,
               v.course_or_affiliation AS courseOrAffiliation
-       FROM users u
-       LEFT JOIN volunteers v
-         ON v.user_id = u.id OR (v.user_id IS NULL AND v.email = u.email)
-       WHERE u.role = 'volunteer'
-       ORDER BY u.name ASC`,
+       FROM volunteers v
+       LEFT JOIN users u
+         ON u.id = v.user_id
+         OR (v.user_id IS NULL AND v.email = u.email AND u.role = 'volunteer')
+       WHERE u.id IS NULL OR u.role = 'volunteer'
+       ORDER BY v.name ASC`,
     )
 
     const [registrations] = await db.query(
-      `SELECT COALESCE(ev.user_id, v.user_id) AS userId,
+      `SELECT ev.user_id AS userId, ev.volunteer_id AS volunteerId,
               e.title AS eventTitle, ev.status, ev.registered_at AS registeredAt
        FROM event_volunteers ev
        JOIN events e ON e.id = ev.event_id
-       LEFT JOIN volunteers v ON v.id = ev.volunteer_id
-       WHERE COALESCE(ev.user_id, v.user_id) IS NOT NULL
-         AND EXISTS (
-           SELECT 1
-           FROM users u
-           WHERE u.id = COALESCE(ev.user_id, v.user_id)
-             AND u.role = 'volunteer'
-         )
+       WHERE ev.user_id IS NOT NULL OR ev.volunteer_id IS NOT NULL
        ORDER BY ev.registered_at DESC`,
     )
 
     const registrationsByUser = new Map()
+    const registrationsByVolunteer = new Map()
     for (const registration of registrations) {
-      const userRegistrations =
-        registrationsByUser.get(registration.userId) || []
-      userRegistrations.push({
+      const event = {
         eventTitle: registration.eventTitle,
         status: registration.status,
         registeredAt: registration.registeredAt,
-      })
-      registrationsByUser.set(registration.userId, userRegistrations)
+      }
+
+      if (registration.userId) {
+        const userRegistrations =
+          registrationsByUser.get(registration.userId) || []
+        userRegistrations.push(event)
+        registrationsByUser.set(registration.userId, userRegistrations)
+      }
+
+      if (registration.volunteerId) {
+        const volunteerRegistrations =
+          registrationsByVolunteer.get(registration.volunteerId) || []
+        volunteerRegistrations.push(event)
+        registrationsByVolunteer.set(
+          registration.volunteerId,
+          volunteerRegistrations,
+        )
+      }
     }
 
     return volunteers.map(volunteer => ({
       ...volunteer,
-      events: registrationsByUser.get(volunteer.id) || [],
+      events:
+        registrationsByUser.get(volunteer.userId) ||
+        registrationsByVolunteer.get(volunteer.volunteerId) ||
+        [],
     }))
   }
 

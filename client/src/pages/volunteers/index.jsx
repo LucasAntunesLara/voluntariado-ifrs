@@ -3,9 +3,13 @@ import {
   CalendarDays,
   GraduationCap,
   Mail,
+  Pencil,
   Phone,
+  Plus,
   RefreshCw,
+  Trash2,
   UsersRound,
+  X,
 } from 'lucide-react'
 import Header from '@/components/layout/header'
 import {Button} from '@/components/ui/button'
@@ -56,11 +60,25 @@ const fetchVolunteers = async () => {
   return response.data
 }
 
+const emptyForm = {
+  name: '',
+  email: '',
+  phone: '',
+  courseOrAffiliation: '',
+}
+
 export default function Volunteers() {
   const [volunteers, setVolunteers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingVolunteer, setEditingVolunteer] = useState(null)
+  const [form, setForm] = useState(emptyForm)
+  const [saving, setSaving] = useState(false)
+  const [deletingVolunteerId, setDeletingVolunteerId] = useState(null)
+  const [mutationError, setMutationError] = useState('')
+  const [notice, setNotice] = useState('')
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true)
@@ -122,6 +140,95 @@ export default function Volunteers() {
     0,
   )
 
+  const openCreateForm = () => {
+    setEditingVolunteer(null)
+    setForm(emptyForm)
+    setMutationError('')
+    setNotice('')
+    setFormOpen(true)
+  }
+
+  const openEditForm = volunteer => {
+    setEditingVolunteer(volunteer)
+    setForm({
+      name: volunteer.name || '',
+      email: volunteer.email || '',
+      phone: volunteer.phone || '',
+      courseOrAffiliation: volunteer.courseOrAffiliation || '',
+    })
+    setMutationError('')
+    setNotice('')
+    setFormOpen(true)
+  }
+
+  const closeForm = () => {
+    if (saving) return
+    setFormOpen(false)
+    setEditingVolunteer(null)
+    setMutationError('')
+  }
+
+  const updateField = event => {
+    const {name, value} = event.target
+    setForm(current => ({...current, [name]: value}))
+  }
+
+  const saveVolunteer = async event => {
+    event.preventDefault()
+    setSaving(true)
+    setMutationError('')
+    setNotice('')
+
+    try {
+      if (editingVolunteer) {
+        await api.put(`/volunteers/${editingVolunteer.volunteerId}`, form)
+        setNotice('Voluntário atualizado com sucesso.')
+      } else {
+        await api.post('/volunteers', form)
+        setNotice('Voluntário cadastrado com sucesso.')
+      }
+      setFormOpen(false)
+      setEditingVolunteer(null)
+      await loadVolunteers()
+    } catch (saveError) {
+      setMutationError(
+        saveError?.response?.data?.error ||
+          'Não foi possível salvar o voluntário. Tente novamente.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteVolunteer = async volunteer => {
+    if (!volunteer.volunteerId) {
+      setMutationError('Não foi possível identificar o cadastro do voluntário.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Tem certeza de que deseja excluir o cadastro de ${volunteer.name}? Essa ação não pode ser desfeita.`,
+    )
+    if (!confirmed) return
+
+    setDeletingVolunteerId(volunteer.volunteerId)
+    setMutationError('')
+    setNotice('')
+
+    try {
+      await api.delete(`/volunteers/${volunteer.volunteerId}`)
+      setNotice('Voluntário excluído com sucesso.')
+      await loadVolunteers()
+    } catch (deleteError) {
+      setMutationError(
+        deleteError?.response?.data?.error ||
+          'Não foi possível excluir o voluntário. Tente novamente.',
+      )
+    } finally {
+      setDeletingVolunteerId(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#fbfaf6] font-sans text-emerald-950">
       <Header />
@@ -131,16 +238,39 @@ export default function Volunteers() {
           <h1 className="mb-2 text-3xl font-bold text-emerald-950">
             Voluntários
           </h1>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={loadVolunteers}
-            disabled={loading}
-            className="gap-2 rounded-full border-[#d9e0d9] bg-[#fffefa] text-emerald-800 hover:bg-[#f1f5ef]">
-            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar lista
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              onClick={openCreateForm}
+              className="gap-2 rounded-full bg-emerald-700 text-white hover:bg-emerald-800">
+              <Plus className="size-4" />
+              Novo voluntário
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={loadVolunteers}
+              disabled={loading}
+              className="gap-2 rounded-full border-[#d9e0d9] bg-[#fffefa] text-emerald-800 hover:bg-[#f1f5ef]">
+              <RefreshCw
+                className={`size-4 ${loading ? 'animate-spin' : ''}`}
+              />
+              Atualizar lista
+            </Button>
+          </div>
         </section>
+
+        {(mutationError || notice) && (
+          <div
+            className={`mb-5 rounded-md border p-3 text-sm ${
+              mutationError
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+            }`}
+            role={mutationError ? 'alert' : 'status'}>
+            {mutationError || notice}
+          </div>
+        )}
 
         <section
           className="mb-6 grid gap-4 sm:grid-cols-2"
@@ -249,12 +379,15 @@ export default function Volunteers() {
                     <TableHead className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#63736a]">
                       Cadastro
                     </TableHead>
+                    <TableHead className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-[#63736a]">
+                      Ações
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredVolunteers.map(volunteer => (
                     <TableRow
-                      key={volunteer.id}
+                      key={volunteer.volunteerId || volunteer.id}
                       className="border-[#eef0e9] align-top hover:bg-[#fafbf7]">
                       <TableCell className="px-5 py-4">
                         <div className="flex min-w-48 items-center gap-3">
@@ -350,6 +483,44 @@ export default function Volunteers() {
                       <TableCell className="px-5 py-4 text-sm text-[#63736a]">
                         {formatDate(volunteer.createdAt)}
                       </TableCell>
+                      <TableCell className="px-5 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            aria-label={`Editar ${volunteer.name}`}
+                            title={`Editar ${volunteer.name}`}
+                            disabled={
+                              !volunteer.volunteerId ||
+                              saving ||
+                              deletingVolunteerId !== null
+                            }
+                            onClick={() => openEditForm(volunteer)}
+                            className="border-[#d9e0d9] text-emerald-800">
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            aria-label={`Excluir ${volunteer.name}`}
+                            title={`Excluir ${volunteer.name}`}
+                            disabled={
+                              !volunteer.volunteerId ||
+                              saving ||
+                              deletingVolunteerId !== null
+                            }
+                            onClick={() => deleteVolunteer(volunteer)}>
+                            {deletingVolunteerId ===
+                            volunteer.volunteerId ? (
+                              <RefreshCw className="size-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -362,6 +533,133 @@ export default function Volunteers() {
           )}
         </Card>
       </main>
+
+      {formOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="volunteer-form-title"
+            className="my-auto w-full max-w-lg rounded-lg border border-[#e8e9e1] bg-[#fffefa] p-6 shadow-xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id="volunteer-form-title"
+                  className="text-xl font-semibold text-emerald-950">
+                  {editingVolunteer ? 'Editar voluntário' : 'Novo voluntário'}
+                </h2>
+                <p className="mt-1 text-sm text-[#63736a]">
+                  Preencha os dados do cadastro.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fechar formulário"
+                onClick={closeForm}
+                disabled={saving}>
+                <X className="size-4" />
+              </Button>
+            </div>
+
+            {mutationError && (
+              <p
+                className="mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700"
+                role="alert">
+                {mutationError}
+              </p>
+            )}
+
+            <form onSubmit={saveVolunteer} className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="volunteer-name"
+                  className="text-sm font-medium text-emerald-950">
+                  Nome completo
+                </label>
+                <Input
+                  id="volunteer-name"
+                  name="name"
+                  autoComplete="name"
+                  maxLength={100}
+                  value={form.name}
+                  onChange={updateField}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="volunteer-email"
+                  className="text-sm font-medium text-emerald-950">
+                  E-mail
+                </label>
+                <Input
+                  id="volunteer-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={100}
+                  value={form.email}
+                  onChange={updateField}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="volunteer-phone"
+                  className="text-sm font-medium text-emerald-950">
+                  Telefone
+                </label>
+                <Input
+                  id="volunteer-phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  maxLength={20}
+                  value={form.phone}
+                  onChange={updateField}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="volunteer-affiliation"
+                  className="text-sm font-medium text-emerald-950">
+                  Curso ou vínculo
+                </label>
+                <Input
+                  id="volunteer-affiliation"
+                  name="courseOrAffiliation"
+                  maxLength={100}
+                  value={form.courseOrAffiliation}
+                  onChange={updateField}
+                  placeholder="Comunidade Externa"
+                />
+              </div>
+              <div className="flex justify-end gap-3 border-t border-[#e8e9e1] pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeForm}
+                  disabled={saving}>
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-emerald-700 text-white hover:bg-emerald-800">
+                  {saving
+                    ? 'Salvando...'
+                    : editingVolunteer
+                      ? 'Salvar alterações'
+                      : 'Cadastrar voluntário'}
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }
