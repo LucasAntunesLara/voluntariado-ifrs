@@ -2,34 +2,33 @@
  * @file authMiddleware.js
  * @description Middleware para validação de JWT e controle de acesso baseado em papéis (RBAC).
  */
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken')
 
 /**
  * Verifica se o usuário possui um token JWT válido.
  */
 function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization
 
   if (!authHeader) {
-    return res
-      .status(401)
-      .json({ error: "Token de autenticação não fornecido." });
+    return res.status(401).json({error: 'Token de autenticação não fornecido.'})
   }
 
-  const parts = authHeader.split(" ");
+  const parts = authHeader.split(' ')
   if (parts.length !== 2)
-    return res.status(401).json({ error: "Erro no formato do token." });
+    return res.status(401).json({error: 'Erro no formato do token.'})
 
-  const [scheme, token] = parts;
+  const [scheme, token] = parts
   if (!/^Bearer$/i.test(scheme))
-    return res.status(401).json({ error: "Token mal formatado." });
+    return res.status(401).json({error: 'Token mal formatado.'})
 
+  // eslint-disable-next-line
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(403)
 
-    req.user = decoded;
-    return next();
-  });
+    req.user = decoded
+    return next()
+  })
 }
 
 /**
@@ -38,13 +37,13 @@ function verifyToken(req, res, next) {
 const authorizeRole = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role))
-      return res.status(403).json({ message: "Acesso negado" });
+      return res.status(403).json({message: 'Acesso negado'})
 
-    next();
-  };
-};
+    next()
+  }
+}
 
 module.exports = {
   verifyToken,
   authorizeRole,
-};
+}
