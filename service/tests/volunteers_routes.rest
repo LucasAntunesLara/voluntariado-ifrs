@@ -15,6 +15,7 @@ Content-Type: application/json
   "name":"Pickle Rick", 
   "email":"piclerick@gmail.com",
   "phone":"(54) 99933-1243",
+  "password":"senha-segura-123",
   "courseOrAffiliation":"Comunidade Externa"
 }
 

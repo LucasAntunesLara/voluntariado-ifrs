@@ -215,12 +215,11 @@ class EventVolunteerModel {
    */
   async findVolunteersByEvent(eventId) {
     const [rows] = await pool.query(
-      `SELECT COALESCE(v.id, u.id) AS id, COALESCE(v.name, u.name) AS name,
-              COALESCE(v.email, u.email) AS email, v.phone,
+      `SELECT COALESCE(v.id, u.id) AS id, u.name, u.email, v.phone,
               v.course_or_affiliation, ev.registered_at, ev.status
        FROM event_volunteers ev
        LEFT JOIN volunteers v ON v.id = ev.volunteer_id
-       LEFT JOIN users u ON u.id = ev.user_id
+       LEFT JOIN users u ON u.id = COALESCE(ev.user_id, v.user_id)
        WHERE ev.event_id = ?
          AND ev.status = 'approved'
        ORDER BY ev.registered_at ASC`,

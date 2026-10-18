@@ -33,7 +33,7 @@ class UserModel {
       await connection.beginTransaction()
 
       const [users] = await connection.execute(
-        'SELECT id, role FROM users WHERE id = ? FOR UPDATE',
+        'SELECT id FROM users WHERE id = ? FOR UPDATE',
         [id],
       )
       if (!users[0]) {
@@ -46,13 +46,6 @@ class UserModel {
         'UPDATE users SET name = ?, email = ? WHERE id = ?',
         [name, email, id],
       )
-
-      if (users[0].role === 'volunteer') {
-        await connection.execute(
-          'UPDATE volunteers SET name = ?, email = ? WHERE user_id = ?',
-          [name, email, id],
-        )
-      }
 
       await connection.commit()
     } catch (error) {
@@ -68,7 +61,13 @@ class UserModel {
     return result.affectedRows > 0
   }
 
-  async createVolunteer({name, email, phone, password}) {
+  async createVolunteer({
+    name,
+    email,
+    phone,
+    password,
+    courseOrAffiliation = 'Comunidade Externa',
+  }) {
     const connection = await db.getConnection()
     try {
       await connection.beginTransaction()
@@ -76,28 +75,10 @@ class UserModel {
         "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'volunteer')",
         [name, email, password],
       )
-      const [existingVolunteers] = await connection.execute(
-        'SELECT id, user_id FROM volunteers WHERE email = ? FOR UPDATE',
-        [email],
+      await connection.execute(
+        'INSERT INTO volunteers (user_id, phone, course_or_affiliation) VALUES (?, ?, ?)',
+        [userResult.insertId, phone, courseOrAffiliation],
       )
-      if (existingVolunteers[0]) {
-        if (existingVolunteers[0].user_id) {
-          const error = new Error(
-            'Este e-mail já está associado a um cadastro de voluntário.',
-          )
-          error.status = 409
-          throw error
-        }
-        await connection.execute(
-          'UPDATE volunteers SET user_id = ?, phone = ? WHERE id = ?',
-          [userResult.insertId, phone, existingVolunteers[0].id],
-        )
-      } else {
-        await connection.execute(
-          'INSERT INTO volunteers (name, email, phone, user_id) VALUES (?, ?, ?, ?)',
-          [name, email, phone, userResult.insertId],
-        )
-      }
       await connection.commit()
       return {
         id: userResult.insertId,
