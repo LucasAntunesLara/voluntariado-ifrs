@@ -28,6 +28,12 @@ class AuthController {
     }
   }
 
+  /**
+   * Registra uma conta de voluntário e inicia uma sessão.
+   * @param {import('express').Request} req - Requisição com nome, e-mail, telefone e senha.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<import('express').Response>} Sessão criada ou erro da operação.
+   */
   async register(req, res) {
     try {
       const {name, email, phone, password} = req.body
@@ -62,6 +68,12 @@ class AuthController {
     }
   }
 
+  /**
+   * Retorna os dados do perfil do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com o usuário identificado pelo token.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<import('express').Response>} Perfil ou erro da operação.
+   */
   async getProfile(req, res) {
     try {
       const profile = await authService.getProfile(req.user.id)
@@ -71,6 +83,12 @@ class AuthController {
     }
   }
 
+  /**
+   * Atualiza o nome e o e-mail do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com os dados atualizados no corpo.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<import('express').Response>} Perfil atualizado ou erro da operação.
+   */
   async updateProfile(req, res) {
     try {
       const profile = await authService.updateProfile(req.user.id, req.body)
@@ -80,6 +98,12 @@ class AuthController {
     }
   }
 
+  /**
+   * Exclui a conta do usuário autenticado.
+   * @param {import('express').Request} req - Requisição com o usuário identificado pelo token.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<import('express').Response>} Resposta sem conteúdo ou erro da operação.
+   */
   async deleteAccount(req, res) {
     try {
       await authService.deleteAccount(req.user.id)
@@ -89,6 +113,12 @@ class AuthController {
     }
   }
 
+  /**
+   * Cria uma nova conta de administrador.
+   * @param {import('express').Request} req - Requisição com nome, e-mail e senha.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<import('express').Response>} Administrador criado ou erro da operação.
+   */
   async createAdmin(req, res) {
     try {
       const {name, email, password} = req.body

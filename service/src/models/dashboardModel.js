@@ -6,6 +6,11 @@
 const db = require('../config/database')
 
 class DashboardModel {
+  /**
+   * Calcula os indicadores agregados exibidos no painel.
+   * @returns {Promise<{activeCampaigns: number, totalVolunteersRegistered: number}>}
+   * Quantidade de eventos ativos e de contas de voluntários cadastradas.
+   */
   async getSummary() {
     const [rows] = await db.query(
       `SELECT

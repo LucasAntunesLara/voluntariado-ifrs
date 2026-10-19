@@ -6,6 +6,10 @@ const jwt = require('jsonwebtoken')
 
 /**
  * Verifica se o usuário possui um token JWT válido.
+ * @param {import('express').Request} req - Requisição HTTP com o cabeçalho Authorization.
+ * @param {import('express').Response} res - Resposta HTTP usada para comunicar falhas de autenticação.
+ * @param {import('express').NextFunction} next - Próximo middleware da cadeia.
+ * @returns {void} Prossegue após validar o token ou encerra a resposta com erro.
  */
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization
@@ -33,6 +37,8 @@ function verifyToken(req, res, next) {
 
 /**
  * Restringe o acesso apenas a usuários com um papel (role) específico.
+ * @param {...string} roles - Papéis permitidos para acessar a rota.
+ * @returns {import('express').RequestHandler} Middleware que autoriza ou rejeita o usuário autenticado.
  */
 const authorizeRole = (...roles) => {
   return (req, res, next) => {

@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs')
 class VolunteerService {
   /**
    * Retorna a lista de todos os voluntários.
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array<Object>>} Voluntários com seus dados e inscrições em eventos.
    */
   async getAllVolunteers() {
     return await VolunteerModel.findAll()
@@ -18,7 +18,9 @@ class VolunteerService {
 
   /**
    * Retorna um voluntário pelo ID.
-   * @returns {Promise<Array>}
+   * @param {number|string} id - Identificador do voluntário.
+   * @returns {Promise<Object>} Dados do voluntário.
+   * @throws {Error} Se o voluntário não for encontrado.
    */
   async getById(id) {
     const event = await VolunteerModel.findById(id)

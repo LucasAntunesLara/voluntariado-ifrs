@@ -83,6 +83,11 @@ class VolunteerModel {
     return rows[0] || null
   }
 
+  /**
+   * Busca o identificador do cadastro de voluntário associado a uma conta.
+   * @param {number} userId - Identificador da conta do usuário.
+   * @returns {Promise<{id: number}|null>} Identificador do cadastro ou null se não existir.
+   */
   async findByUserId(userId) {
     const [rows] = await db.query(
       'SELECT id FROM volunteers WHERE user_id = ?',
