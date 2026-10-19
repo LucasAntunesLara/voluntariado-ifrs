@@ -20,6 +20,12 @@ class EventController {
     }
   }
 
+  /**
+   * Retorna um evento pelo identificador informado na rota.
+   * @param {import('express').Request} req - Requisição com o ID do evento em `params.id`.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<void>} Envia o evento ou a resposta de erro.
+   */
   static async getById(req, res) {
     try {
       const id = req.params.id
@@ -31,6 +37,12 @@ class EventController {
     }
   }
 
+  /**
+   * Cria um evento com os dados enviados no corpo da requisição.
+   * @param {import('express').Request} req - Requisição com os dados do evento e usuário autenticado.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<void>} Envia a confirmação com o ID criado ou a resposta de erro.
+   */
   static async create(req, res) {
     try {
       const id = await EventService.create(req.body, req.user)
@@ -40,6 +52,12 @@ class EventController {
     }
   }
 
+  /**
+   * Atualiza um evento existente.
+   * @param {import('express').Request} req - Requisição com o ID e os dados atualizados.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<void>} Envia a confirmação ou a resposta de erro.
+   */
   static async update(req, res) {
     try {
       const id = req.params.id
@@ -50,6 +68,12 @@ class EventController {
     }
   }
 
+  /**
+   * Exclui um evento pelo identificador informado na rota.
+   * @param {import('express').Request} req - Requisição com o ID do evento em `params.id`.
+   * @param {import('express').Response} res - Resposta HTTP.
+   * @returns {Promise<void>} Envia a confirmação ou a resposta de erro.
+   */
   static async delete(req, res) {
     try {
       const id = req.params.id

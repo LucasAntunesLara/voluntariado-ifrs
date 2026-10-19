@@ -67,6 +67,8 @@ router.get('/:id', EventController.getById)
  *   post:
  *     summary: Cria um novo evento
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -93,6 +95,10 @@ router.get('/:id', EventController.getById)
  *                   type: string
  *       400:
  *         description: Dados inválidos.
+ *       401:
+ *         description: Token de autenticação não fornecido.
+ *       403:
+ *         description: Acesso permitido somente para administradores.
  */
 router.post('/', verifyToken, authorizeRole('admin'), EventController.create)
 

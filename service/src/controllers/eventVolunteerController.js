@@ -43,37 +43,10 @@ class EventVolunteerController {
   }
 
   /**
-   * @swagger
-   * /events/{eventId}/registrations/{registrationId}:
-   *   delete:
-   *     summary: Remove uma inscrição de voluntário de um evento
-   *     tags: [Inscrições]
-   *     parameters:
-   *       - in: path
-   *         name: eventId
-   *         required: true
-   *         schema:
-   *           type: integer
-   *         description: ID do evento
-   *       - in: path
-   *         name: registrationId
-   *         required: true
-   *         schema:
-   *           type: integer
-   *         description: ID da inscrição
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       204:
-   *         description: Inscrição removida com sucesso
-   *       401:
-   *         description: Token de autenticação ausente ou inválido
-   *       403:
-   *         description: Acesso permitido somente para administradores
-   *       404:
-   *         description: Inscrição não encontrada para o evento informado
-   *       500:
-   *         description: Erro ao remover a inscrição
+   * Remove uma inscrição usando os identificadores do evento e do vínculo.
+   * @param {Object} req - Requisição com `eventId` e `registrationId` em `params`.
+   * @param {Object} res - Resposta HTTP.
+   * @returns {Promise<Object>} Resposta sem conteúdo ou erro da operação.
    */
   async removeRegistration(req, res) {
     try {
@@ -105,6 +78,12 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Lista todas as solicitações de participação para análise administrativa.
+   * @param {Object} req - Requisição HTTP.
+   * @param {Object} res - Resposta HTTP.
+   * @returns {Promise<Object>} Lista de solicitações ou erro da consulta.
+   */
   async listAdminRequests(req, res) {
     try {
       const requests = await eventVolunteerService.getRequestsForAdmin()
@@ -114,6 +93,12 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Lista as solicitações de participação do usuário autenticado.
+   * @param {Object} req - Requisição com o usuário identificado pelo token.
+   * @param {Object} res - Resposta HTTP.
+   * @returns {Promise<Object>} Lista de solicitações ou erro da consulta.
+   */
   async listMyRequests(req, res) {
     try {
       const requests = await eventVolunteerService.getRequestsByUser(
@@ -125,6 +110,12 @@ class EventVolunteerController {
     }
   }
 
+  /**
+   * Aprova ou recusa uma solicitação de participação.
+   * @param {Object} req - Requisição com o ID da solicitação e a decisão em `body.status`.
+   * @param {Object} res - Resposta HTTP.
+   * @returns {Promise<Object>} Resultado da análise ou erro da operação.
+   */
   async reviewRequest(req, res) {
     try {
       const {status} = req.body

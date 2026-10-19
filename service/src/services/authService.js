@@ -63,6 +63,12 @@ class AuthService {
     return this.createSession(user)
   }
 
+  /**
+   * Obtém os dados de perfil de uma conta.
+   * @param {number|string} id - Identificador do usuário.
+   * @returns {Promise<Object>} Perfil público da conta.
+   * @throws {Error} Com status 404 se a conta não existir.
+   */
   async getProfile(id) {
     const user = await userModel.findProfileById(id)
     if (!user) {
@@ -73,6 +79,14 @@ class AuthService {
     return user
   }
 
+  /**
+   * Valida e persiste alterações no nome e no e-mail da conta.
+   * @param {number|string} id - Identificador do usuário.
+   * @param {{name: string, email: string}} profile - Nome e e-mail atualizados.
+   * @returns {Promise<Object>} Perfil após a atualização.
+   * @throws {Error} Com status 400 para dados inválidos, 404 para conta ausente
+   * ou 409 se o e-mail já estiver em uso.
+   */
   async updateProfile(id, {name, email}) {
     const normalizedName = name?.trim()
     const normalizedEmail = email?.trim().toLowerCase()
@@ -114,6 +128,12 @@ class AuthService {
     return this.getProfile(id)
   }
 
+  /**
+   * Exclui a conta do usuário.
+   * @param {number|string} id - Identificador do usuário.
+   * @returns {Promise<void>} Conclui quando a conta é removida.
+   * @throws {Error} Com status 404 se a conta não existir.
+   */
   async deleteAccount(id) {
     const deleted = await userModel.deleteAccount(id)
     if (!deleted) {
@@ -172,6 +192,14 @@ class AuthService {
     }
   }
 
+  /**
+   * Cria uma conta administrativa, armazenando a senha como hash.
+   * @param {string} name - Nome do administrador.
+   * @param {string} email - E-mail da conta.
+   * @param {string} password - Senha em texto plano.
+   * @returns {Promise<Object>} Dados básicos da conta administrativa criada.
+   * @throws {Error} Com status 409 se já existir uma conta com o e-mail informado.
+   */
   async createAdmin(name, email, password) {
     const normalizedEmail = email.trim().toLowerCase()
     if (await userModel.findByEmail(normalizedEmail)) {

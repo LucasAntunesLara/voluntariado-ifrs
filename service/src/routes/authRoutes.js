@@ -49,6 +49,7 @@ router.post('/login', (req, res) => authController.login(req, res))
  *             required:
  *               - name
  *               - email
+ *               - phone
  *               - password
  *             properties:
  *               name:
@@ -56,6 +57,8 @@ router.post('/login', (req, res) => authController.login(req, res))
  *               email:
  *                 type: string
  *                 format: email
+ *               phone:
+ *                 type: string
  *               password:
  *                 type: string
  *                 minLength: 8
@@ -69,12 +72,93 @@ router.post('/login', (req, res) => authController.login(req, res))
  */
 router.post('/register', (req, res) => authController.register(req, res))
 
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Retorna o perfil do usuário autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil do usuário retornado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         description: Token ausente ou inválido.
+ *       404:
+ *         description: Conta não encontrada.
+ *       500:
+ *         description: Erro interno ao consultar o perfil.
+ */
 router.get('/me', verifyToken, (req, res) =>
   authController.getProfile(req, res),
 )
+
+/**
+ * @swagger
+ * /auth/me:
+ *   patch:
+ *     summary: Atualiza o nome e o e-mail do usuário autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 maxLength: 100
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 maxLength: 100
+ *     responses:
+ *       200:
+ *         description: Perfil atualizado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Nome ou e-mail inválido ou ausente.
+ *       401:
+ *         description: Token ausente ou inválido.
+ *       409:
+ *         description: E-mail já utilizado por outra conta.
+ *       500:
+ *         description: Erro interno ao atualizar o perfil.
+ */
 router.patch('/me', verifyToken, (req, res) =>
   authController.updateProfile(req, res),
 )
+
+/**
+ * @swagger
+ * /auth/me:
+ *   delete:
+ *     summary: Exclui a conta do usuário autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: Conta excluída com sucesso.
+ *       401:
+ *         description: Token ausente ou inválido.
+ *       404:
+ *         description: Conta não encontrada.
+ *       500:
+ *         description: Erro interno ao excluir a conta.
+ */
 router.delete('/me', verifyToken, (req, res) =>
   authController.deleteAccount(req, res),
 )

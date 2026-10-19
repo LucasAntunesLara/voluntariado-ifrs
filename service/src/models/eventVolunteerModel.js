@@ -20,6 +20,12 @@ class EventVolunteerModel {
     return result.affectedRows > 0
   }
 
+  /**
+   * Remove um vínculo de inscrição pelo identificador da inscrição e do evento.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} registrationId - Identificador do vínculo de inscrição.
+   * @returns {Promise<boolean>} Indica se uma inscrição foi removida.
+   */
   async deleteRegistration(eventId, registrationId) {
     const [result] = await pool.query(
       'DELETE FROM event_volunteers WHERE event_id = ? AND id = ?',
@@ -41,6 +47,14 @@ class EventVolunteerModel {
     return rows[0].total
   }
 
+  /**
+   * Cria ou reabre uma solicitação de participação, garantindo a capacidade do evento.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} userId - Identificador do usuário voluntário.
+   * @returns {Promise<{id: number, eventId: number, status: 'pending'}>} Solicitação pendente criada.
+   * @throws {Error} Com status 404 se o evento não existir ou 409 se não houver vaga
+   * ou já existir uma solicitação/inscrição não recusada.
+   */
   async createRequest(eventId, userId) {
     const connection = await pool.getConnection()
     try {
@@ -105,6 +119,15 @@ class EventVolunteerModel {
     }
   }
 
+  /**
+   * Registra a decisão administrativa para uma solicitação pendente.
+   * @param {number} requestId - Identificador da solicitação.
+   * @param {'approved'|'rejected'} decision - Decisão a aplicar.
+   * @returns {Promise<{id: number, eventId: number, userId: number, status: string, capacityRejected: boolean}>}
+   * Solicitação analisada; `capacityRejected` indica recusa automática por falta de vagas.
+   * @throws {Error} Com status 404 se a solicitação/evento não existir ou 409 se a solicitação
+   * já tiver sido analisada.
+   */
   async reviewRequest(requestId, decision) {
     const connection = await pool.getConnection()
     try {
@@ -174,6 +197,10 @@ class EventVolunteerModel {
     }
   }
 
+  /**
+   * Lista solicitações com dados do usuário e do evento para a área administrativa.
+   * @returns {Promise<Array<Object>>} Solicitações ordenadas por estado e data de registro.
+   */
   async findRequestsForAdmin() {
     const [rows] = await pool.query(
       `SELECT ev.id, ev.event_id AS eventId, ev.user_id AS userId, ev.status,
@@ -188,6 +215,11 @@ class EventVolunteerModel {
     return rows
   }
 
+  /**
+   * Lista as solicitações pertencentes a um usuário.
+   * @param {number} userId - Identificador do usuário.
+   * @returns {Promise<Array<Object>>} Solicitações do usuário, da mais recente para a mais antiga.
+   */
   async findRequestsByUser(userId) {
     const [rows] = await pool.query(
       `SELECT ev.id, ev.event_id AS eventId, ev.status,

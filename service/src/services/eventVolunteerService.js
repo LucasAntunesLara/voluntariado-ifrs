@@ -7,10 +7,26 @@ const eventVolunteerModel = require('../models/eventVolunteerModel')
 const eventModel = require('../models/eventModel')
 
 class EventVolunteerService {
+  /**
+   * Solicita a participação de um usuário em um evento.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} userId - Identificador do usuário voluntário.
+   * @returns {Promise<{id: number, eventId: number, status: 'pending'}>} Solicitação criada ou reaberta.
+   * @throws {Error} Com status 404 se o evento não existir ou 409 se não houver vaga
+   * ou já existir uma solicitação/inscrição válida.
+   */
   async requestParticipation(eventId, userId) {
     return await eventVolunteerModel.createRequest(eventId, userId)
   }
 
+  /**
+   * Registra a decisão administrativa sobre uma solicitação pendente.
+   * @param {number} requestId - Identificador da solicitação.
+   * @param {'approved'|'rejected'} decision - Decisão a aplicar.
+   * @returns {Promise<Object>} Solicitação atualizada.
+   * @throws {Error} Com status 400 para decisão inválida, 404 para solicitação/evento ausente,
+   * ou 409 se já analisada ou recusada automaticamente por falta de vagas.
+   */
   async reviewRequest(requestId, decision) {
     if (!['approved', 'rejected'].includes(decision)) {
       const error = new Error("A decisão deve ser 'approved' ou 'rejected'.")
@@ -30,10 +46,19 @@ class EventVolunteerService {
     return result
   }
 
+  /**
+   * Obtém todas as solicitações para análise administrativa.
+   * @returns {Promise<Array<Object>>} Lista de solicitações com dados de usuários e eventos.
+   */
   async getRequestsForAdmin() {
     return await eventVolunteerModel.findRequestsForAdmin()
   }
 
+  /**
+   * Obtém as solicitações de um usuário.
+   * @param {number} userId - Identificador do usuário.
+   * @returns {Promise<Array<Object>>} Lista de solicitações do usuário.
+   */
   async getRequestsByUser(userId) {
     return await eventVolunteerModel.findRequestsByUser(userId)
   }
@@ -57,6 +82,13 @@ class EventVolunteerService {
     return await eventVolunteerModel.delete(eventId, volunteerId)
   }
 
+  /**
+   * Remove uma inscrição pelo identificador do vínculo.
+   * @param {number} eventId - Identificador do evento.
+   * @param {number} registrationId - Identificador da inscrição.
+   * @returns {Promise<void>} Conclui quando a inscrição é removida.
+   * @throws {Error} Com status 404 se a inscrição não existir para o evento.
+   */
   async removeRegistration(eventId, registrationId) {
     const removed = await eventVolunteerModel.deleteRegistration(
       eventId,

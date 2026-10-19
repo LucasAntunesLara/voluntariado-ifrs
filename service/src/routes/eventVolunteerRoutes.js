@@ -74,8 +74,40 @@ router.get('/:eventId/volunteers', eventVolunteerController.listEventVolunteers)
  *   post:
  *     summary: Inscreve um voluntário em um evento
  *     tags: [EventVolunteers]
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         description: ID do evento
+ *         schema:
+ *           type: integer
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Solicitação de participação criada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 eventId:
+ *                   type: integer
+ *                 status:
+ *                   type: string
+ *                   enum: [pending]
+ *       401:
+ *         description: Token ausente ou inválido.
+ *       403:
+ *         description: Acesso permitido somente para voluntários.
+ *       404:
+ *         description: Evento não encontrado.
+ *       409:
+ *         description: Não há vagas ou já existe solicitação para este evento.
+ *       500:
+ *         description: Erro ao criar a solicitação.
  */
 router.post(
   '/:eventId/volunteers',
@@ -91,7 +123,31 @@ router.post(
  *     summary: Remove a inscrição de um voluntário em um evento
  *     tags: [EventVolunteers]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         description: ID do evento
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: volunteerId
+ *         required: true
+ *         description: ID do voluntário
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Inscrição removida com sucesso.
+ *       401:
+ *         description: Token ausente ou inválido.
+ *       403:
+ *         description: Acesso permitido somente para administradores.
+ *       404:
+ *         description: Inscrição não encontrada.
+ *       500:
+ *         description: Erro ao remover a inscrição.
  */
 router.delete(
   '/:eventId/volunteers/:volunteerId',
