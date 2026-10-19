@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useForm} from 'react-hook-form'
 import {useNavigate} from 'react-router-dom'
 import {
   CalendarDays,
@@ -25,20 +26,22 @@ export default function Profile() {
   const {user, updateUser, logout} = useAuth()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
-  const [form, setForm] = useState({name: '', email: ''})
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const {register, handleSubmit, reset} = useForm({
+    defaultValues: {name: '', email: ''},
+  })
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const {data} = await api.get('/auth/me')
         setProfile(data)
-        setForm({name: data.name, email: data.email})
+        reset({name: data.name, email: data.email})
       } catch (loadError) {
         setError(
           loadError?.response?.data?.error ||
@@ -50,21 +53,16 @@ export default function Profile() {
     }
 
     loadProfile()
-  }, [])
-
-  const updateField = event => {
-    setForm(current => ({...current, [event.target.name]: event.target.value}))
-  }
+  }, [reset])
 
   const cancelEditing = () => {
-    setForm({name: profile.name, email: profile.email})
+    reset({name: profile.name, email: profile.email})
     setEditing(false)
     setError('')
     setNotice('')
   }
 
-  const saveProfile = async event => {
-    event.preventDefault()
+  const saveProfile = async form => {
     setSaving(true)
     setError('')
     setNotice('')
@@ -72,7 +70,7 @@ export default function Profile() {
     try {
       const {data} = await api.patch('/auth/me', form)
       setProfile(data)
-      setForm({name: data.name, email: data.email})
+      reset({name: data.name, email: data.email})
       updateUser({...user, name: data.name, email: data.email})
       setEditing(false)
       setNotice('Seus dados foram atualizados.')
@@ -152,7 +150,7 @@ export default function Profile() {
           ) : profile ? (
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
               <form
-                onSubmit={saveProfile}
+                onSubmit={handleSubmit(saveProfile)}
                 className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 p-6">
                   <div className="flex items-center gap-4">
@@ -198,10 +196,8 @@ export default function Profile() {
                       name="name"
                       autoComplete="name"
                       maxLength={100}
-                      required
                       disabled={!editing || saving}
-                      value={form.name}
-                      onChange={updateField}
+                      {...register('name', {required: true, maxLength: 100})}
                       className="h-11"
                     />
                   </div>
@@ -219,10 +215,8 @@ export default function Profile() {
                       type="email"
                       autoComplete="email"
                       maxLength={100}
-                      required
                       disabled={!editing || saving}
-                      value={form.email}
-                      onChange={updateField}
+                      {...register('email', {required: true, maxLength: 100})}
                       className="h-11"
                     />
                   </div>

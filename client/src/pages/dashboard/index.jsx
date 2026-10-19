@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from 'react'
+import {useForm} from 'react-hook-form'
 import {Link} from 'react-router-dom'
 import Header from '@/components/layout/header'
 import {Button} from '@/components/ui/button'
@@ -19,12 +20,11 @@ export default function Dashboard() {
   const [busyRequest, setBusyRequest] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [adminName, setAdminName] = useState('')
-  const [adminEmail, setAdminEmail] = useState('')
-  const [adminPassword, setAdminPassword] = useState('')
   const [adminFormError, setAdminFormError] = useState('')
   const [adminFormNotice, setAdminFormNotice] = useState('')
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false)
+  const {register, handleSubmit, reset, formState: {isSubmitting}} = useForm({
+    defaultValues: {name: '', email: '', password: ''},
+  })
   const [summary, setSummary] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(true)
   const [summaryError, setSummaryError] = useState('')
@@ -115,29 +115,21 @@ export default function Dashboard() {
     }
   }
 
-  const createAdmin = async event => {
-    event.preventDefault()
-    setIsCreatingAdmin(true)
+  const createAdmin = async form => {
     setAdminFormError('')
     setAdminFormNotice('')
 
     try {
       const {data} = await api.post('/dashboard/admins', {
-        name: adminName,
-        email: adminEmail,
-        password: adminPassword,
+        ...form,
       })
       setAdminFormNotice(`Administrador ${data.name} criado com sucesso.`)
-      setAdminName('')
-      setAdminEmail('')
-      setAdminPassword('')
+      reset()
     } catch (createError) {
       setAdminFormError(
         createError?.response?.data?.error ||
           'Não foi possível adicionar o administrador.',
       )
-    } finally {
-      setIsCreatingAdmin(false)
     }
   }
 
@@ -275,16 +267,14 @@ export default function Dashboard() {
                 </p>
                 <form
                   className="grid gap-4 md:grid-cols-2"
-                  onSubmit={createAdmin}>
+                  onSubmit={handleSubmit(createAdmin)}>
                   <label className="grid gap-1 text-sm font-medium text-gray-700">
                     Nome
                     <Input
                       type="text"
                       autoComplete="name"
                       maxLength={100}
-                      required
-                      value={adminName}
-                      onChange={event => setAdminName(event.target.value)}
+                      {...register('name', {required: true, maxLength: 100})}
                     />
                   </label>
                   <label className="grid gap-1 text-sm font-medium text-gray-700">
@@ -293,9 +283,7 @@ export default function Dashboard() {
                       type="email"
                       autoComplete="email"
                       maxLength={100}
-                      required
-                      value={adminEmail}
-                      onChange={event => setAdminEmail(event.target.value)}
+                      {...register('email', {required: true, maxLength: 100})}
                     />
                   </label>
                   <label className="grid gap-1 text-sm font-medium text-gray-700">
@@ -304,17 +292,18 @@ export default function Dashboard() {
                       type="password"
                       autoComplete="new-password"
                       minLength={8}
-                      required
-                      value={adminPassword}
-                      onChange={event => setAdminPassword(event.target.value)}
+                      {...register('password', {
+                        required: true,
+                        minLength: 8,
+                      })}
                     />
                   </label>
                   <div className="flex items-end">
                     <Button
                       type="submit"
-                      disabled={isCreatingAdmin}
+                      disabled={isSubmitting}
                       className="bg-emerald-700 text-white hover:bg-emerald-800">
-                      {isCreatingAdmin
+                      {isSubmitting
                         ? 'Adicionando...'
                         : 'Adicionar administrador'}
                     </Button>
