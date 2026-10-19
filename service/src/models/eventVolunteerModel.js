@@ -20,6 +20,14 @@ class EventVolunteerModel {
     return result.affectedRows > 0
   }
 
+  async deleteRegistration(eventId, registrationId) {
+    const [result] = await pool.query(
+      'DELETE FROM event_volunteers WHERE event_id = ? AND id = ?',
+      [eventId, registrationId],
+    )
+    return result.affectedRows > 0
+  }
+
   /**
    * Retorna a contagem atual de voluntários inscritos em um evento.
    * @param {number} eventId - ID do evento.
@@ -215,7 +223,8 @@ class EventVolunteerModel {
    */
   async findVolunteersByEvent(eventId) {
     const [rows] = await pool.query(
-      `SELECT COALESCE(v.id, u.id) AS id, u.name, u.email, v.phone,
+      `SELECT ev.id AS registrationId, COALESCE(v.id, u.id) AS id,
+              u.name, u.email, v.phone,
               v.course_or_affiliation, ev.registered_at, ev.status
        FROM event_volunteers ev
        LEFT JOIN volunteers v ON v.id = ev.volunteer_id
