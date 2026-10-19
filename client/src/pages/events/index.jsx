@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import api from '../../services/api'
 import Header from '@/components/layout/header'
 import {Link} from 'react-router-dom'
@@ -17,6 +17,7 @@ import {
   Pencil,
   PlusCircle,
   Users,
+  UserRound,
   XCircleIcon,
 } from 'lucide-react'
 
@@ -29,6 +30,12 @@ export default function EventsList() {
   const [requestErrors, setRequestErrors] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [participantsEvent, setParticipantsEvent] = useState(null)
+  const [participants, setParticipants] = useState([])
+  const [participantsLoading, setParticipantsLoading] = useState(false)
+  const [participantsError, setParticipantsError] = useState('')
+  const [removingRegistrationId, setRemovingRegistrationId] = useState(null)
+  const participantsRequestId = useRef(0)
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -112,6 +119,80 @@ export default function EventsList() {
     }
   }
 
+  const showParticipants = async event => {
+    const requestId = ++participantsRequestId.current
+    setParticipantsEvent(event)
+    setParticipants([])
+    setParticipantsError('')
+    setParticipantsLoading(true)
+
+    try {
+      const {data} = await api.get(`/events/${event.id}/volunteers`)
+      if (participantsRequestId.current === requestId) {
+        setParticipants(data)
+      }
+    } catch (participantsLoadError) {
+      if (participantsRequestId.current === requestId) {
+        setParticipantsError(
+          participantsLoadError?.response?.data?.error ||
+            'Não foi possível carregar os participantes.',
+        )
+      }
+    } finally {
+      if (participantsRequestId.current === requestId) {
+        setParticipantsLoading(false)
+      }
+    }
+  }
+
+  const closeParticipants = () => {
+    participantsRequestId.current += 1
+    setParticipantsEvent(null)
+  }
+
+  const removeParticipant = async participant => {
+    if (
+      !window.confirm(
+        `Remover ${participant.name} da ação "${participantsEvent.title}"?`,
+      )
+    ) {
+      return
+    }
+
+    setRemovingRegistrationId(participant.registrationId)
+    setParticipantsError('')
+    try {
+      await api.delete(
+        `/events/${participantsEvent.id}/registrations/${participant.registrationId}`,
+      )
+      setParticipants(current =>
+        current.filter(
+          item => item.registrationId !== participant.registrationId,
+        ),
+      )
+      setEvents(current =>
+        current.map(event =>
+          event.id === participantsEvent.id
+            ? {
+                ...event,
+                volunteers_count: Math.max(
+                  0,
+                  Number(event.volunteers_count || 0) - 1,
+                ),
+              }
+            : event,
+        ),
+      )
+    } catch (removeError) {
+      setParticipantsError(
+        removeError?.response?.data?.error ||
+          'Não foi possível remover o participante.',
+      )
+    } finally {
+      setRemovingRegistrationId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -175,6 +256,13 @@ export default function EventsList() {
                     <CardDescription className="text-muted-foreground text-sm mb-4">
                       {event.description}
                     </CardDescription>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="mb-3 h-auto p-0 text-emerald-800"
+                      onClick={() => showParticipants(event)}>
+                      Ver participantes confirmados
+                    </Button>
 
                     <CardContent className="text-xs text-gray-500 space-y-1 mb-4 px-0">
                       <div className="flex items-center gap-2">
@@ -272,6 +360,91 @@ export default function EventsList() {
           )}
         </div>
       </div>
+      {participantsEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-participants-title"
+            className="my-auto w-full max-w-xl rounded-lg bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id="event-participants-title"
+                  className="text-xl font-semibold text-gray-900">
+                  Participantes confirmados
+                </h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  {participantsEvent.title}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeParticipants}>
+                Fechar
+              </Button>
+            </div>
+
+            {participantsError && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                <p role="alert">{participantsError}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => showParticipants(participantsEvent)}>
+                  Tentar novamente
+                </Button>
+              </div>
+            )}
+            {participantsLoading ? (
+              <p className="py-6 text-center text-sm text-gray-600" role="status">
+                Carregando participantes...
+              </p>
+            ) : participants.length === 0 && !participantsError ? (
+              <p className="py-6 text-center text-sm text-gray-600">
+                Ainda não há participantes confirmados para esta ação.
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {participants.map(participant => (
+                  <li
+                    key={participant.registrationId}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <UserRound
+                        className="size-5 shrink-0 text-emerald-700"
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">
+                          {participant.name}
+                        </p>
+                        <p className="truncate text-sm text-gray-600">
+                          {participant.email}
+                        </p>
+                      </div>
+                    </div>
+                    {user?.role === 'admin' && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={removingRegistrationId !== null}
+                        onClick={() => removeParticipant(participant)}>
+                        {removingRegistrationId ===
+                        participant.registrationId
+                          ? 'Removendo...'
+                          : 'Remover da ação'}
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )}
     </>
   )
 }

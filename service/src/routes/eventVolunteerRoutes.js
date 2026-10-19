@@ -15,6 +15,56 @@ const router = Router()
  *   get:
  *     summary: Lista todos os voluntários inscritos em um evento
  *     tags: [EventVolunteers]
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         description: ID do evento
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Participantes confirmados retornados com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 required:
+ *                   - registrationId
+ *                   - id
+ *                   - name
+ *                   - email
+ *                   - status
+ *                 properties:
+ *                   registrationId:
+ *                     type: integer
+ *                     description: Identificador da inscrição no evento.
+ *                   id:
+ *                     type: integer
+ *                     description: Identificador do voluntário ou da conta.
+ *                   name:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                     format: email
+ *                   phone:
+ *                     type: string
+ *                     nullable: true
+ *                   course_or_affiliation:
+ *                     type: string
+ *                     nullable: true
+ *                   registered_at:
+ *                     type: string
+ *                     format: date-time
+ *                   status:
+ *                     type: string
+ *                     enum: [approved]
+ *       404:
+ *         description: Evento não encontrado.
+ *       500:
+ *         description: Erro ao consultar os participantes.
  */
 router.get('/:eventId/volunteers', eventVolunteerController.listEventVolunteers)
 
@@ -48,6 +98,46 @@ router.delete(
   verifyToken,
   authorizeRole('admin'),
   eventVolunteerController.unregister,
+)
+
+/**
+ * @swagger
+ * /events/{eventId}/registrations/{registrationId}:
+ *   delete:
+ *     summary: Remove uma inscrição pelo identificador do vínculo
+ *     tags: [EventVolunteers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         description: ID do evento
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: registrationId
+ *         required: true
+ *         description: ID da inscrição que será removida
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Inscrição removida com sucesso.
+ *       401:
+ *         description: Token de autenticação ausente ou inválido.
+ *       403:
+ *         description: Acesso permitido somente para administradores.
+ *       404:
+ *         description: Inscrição não encontrada para o evento informado.
+ *       500:
+ *         description: Erro interno ao remover a inscrição.
+ */
+router.delete(
+  '/:eventId/registrations/:registrationId',
+  verifyToken,
+  authorizeRole('admin'),
+  eventVolunteerController.removeRegistration,
 )
 
 module.exports = router

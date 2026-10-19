@@ -43,6 +43,52 @@ class EventVolunteerController {
   }
 
   /**
+   * @swagger
+   * /events/{eventId}/registrations/{registrationId}:
+   *   delete:
+   *     summary: Remove uma inscrição de voluntário de um evento
+   *     tags: [Inscrições]
+   *     parameters:
+   *       - in: path
+   *         name: eventId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID do evento
+   *       - in: path
+   *         name: registrationId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID da inscrição
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       204:
+   *         description: Inscrição removida com sucesso
+   *       401:
+   *         description: Token de autenticação ausente ou inválido
+   *       403:
+   *         description: Acesso permitido somente para administradores
+   *       404:
+   *         description: Inscrição não encontrada para o evento informado
+   *       500:
+   *         description: Erro ao remover a inscrição
+   */
+  async removeRegistration(req, res) {
+    try {
+      const {eventId, registrationId} = req.params
+      await eventVolunteerService.removeRegistration(
+        Number(eventId),
+        Number(registrationId),
+      )
+      return res.status(204).send()
+    } catch (error) {
+      return res.status(error.status || 500).json({error: error.message})
+    }
+  }
+
+  /**
    * Lista todos os voluntários de um evento específico.
    * @param {Object} req - Requisição HTTP.
    * @param {Object} res - Resposta HTTP.

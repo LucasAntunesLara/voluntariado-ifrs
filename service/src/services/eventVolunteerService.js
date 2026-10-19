@@ -57,6 +57,20 @@ class EventVolunteerService {
     return await eventVolunteerModel.delete(eventId, volunteerId)
   }
 
+  async removeRegistration(eventId, registrationId) {
+    const removed = await eventVolunteerModel.deleteRegistration(
+      eventId,
+      registrationId,
+    )
+    if (!removed) {
+      const error = new Error(
+        'Inscrição não encontrada para este voluntário neste evento.',
+      )
+      error.status = 404
+      throw error
+    }
+  }
+
   /**
    * Lista todos os voluntários inscritos em um determinado evento.
    * @param {number} eventId - ID do evento.
