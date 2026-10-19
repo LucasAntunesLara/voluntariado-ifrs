@@ -276,7 +276,7 @@ export default function EventsList() {
                         <div className="bg-emerald-100 text-emerald-800 p-2 rounded-full">
                           <Users className="size-5 rounded-full2" />
                         </div>
-                        {event.volunteers_count || 0} vagas de
+                        {event.volunteers_count || 0} vagas de{' '}
                         {event.max_volunteers} preenchidas
                       </div>
 
@@ -398,7 +398,9 @@ export default function EventsList() {
               </div>
             )}
             {participantsLoading ? (
-              <p className="py-6 text-center text-sm text-gray-600" role="status">
+              <p
+                className="py-6 text-center text-sm text-gray-600"
+                role="status">
                 Carregando participantes...
               </p>
             ) : participants.length === 0 && !participantsError ? (
@@ -432,8 +434,7 @@ export default function EventsList() {
                         size="sm"
                         disabled={removingRegistrationId !== null}
                         onClick={() => removeParticipant(participant)}>
-                        {removingRegistrationId ===
-                        participant.registrationId
+                        {removingRegistrationId === participant.registrationId
                           ? 'Removendo...'
                           : 'Remover da ação'}
                       </Button>
