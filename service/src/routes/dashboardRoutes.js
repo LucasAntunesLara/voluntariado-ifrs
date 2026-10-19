@@ -17,12 +17,39 @@ const router = Router()
  *     summary: Rota protegida acessível apenas por usuários autenticados
  *     tags: [Auth]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Acesso autorizado ao painel.
+ *         description: Resumo calculado a partir dos eventos e voluntários cadastrados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     email:
+ *                       type: string
+ *                       format: email
+ *                     role:
+ *                       type: string
+ *                       enum: [admin, volunteer]
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     activeCampaigns:
+ *                       type: integer
+ *                       description: Eventos com data e horário atuais ou futuros.
+ *                     totalVolunteersRegistered:
+ *                       type: integer
+ *                       description: Contas com cadastro de voluntário.
  *       401:
  *         description: Token ausente ou inválido.
+ *       500:
+ *         description: Erro ao calcular o resumo do painel.
  */
 router.get('/', verifyToken, authController.getDashboard)
 router.post(
