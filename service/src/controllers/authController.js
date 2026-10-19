@@ -3,6 +3,7 @@
  * @description Controlador para rotas de autenticação.
  */
 const authService = require('../services/authService')
+const dashboardModel = require('../models/dashboardModel')
 
 class AuthController {
   /**
@@ -119,16 +120,14 @@ class AuthController {
    */
   async getDashboard(req, res) {
     try {
+      const summary = await dashboardModel.getSummary()
       return res.status(200).json({
         message: 'Acesso autorizado ao painel.',
         user: {
           email: req.user.email,
           role: req.user.role,
         },
-        summary: {
-          activeCampaigns: 3,
-          totalVolunteersRegistered: 4,
-        },
+        summary,
       })
     } catch (error) {
       return res.status(500).json({error: error.message})

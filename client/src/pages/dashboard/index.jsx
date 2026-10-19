@@ -25,6 +25,9 @@ export default function Dashboard() {
   const [adminFormError, setAdminFormError] = useState('')
   const [adminFormNotice, setAdminFormNotice] = useState('')
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false)
+  const [summary, setSummary] = useState(null)
+  const [summaryLoading, setSummaryLoading] = useState(true)
+  const [summaryError, setSummaryError] = useState('')
 
   const loadRequests = useCallback(async endpoint => {
     setError('')
@@ -41,6 +44,22 @@ export default function Dashboard() {
     }
   }, [])
 
+  const loadSummary = useCallback(async () => {
+    setSummaryError('')
+    setSummaryLoading(true)
+    try {
+      const {data} = await api.get('/dashboard')
+      setSummary(data.summary)
+    } catch (summaryLoadError) {
+      setSummaryError(
+        summaryLoadError?.response?.data?.error ||
+          'Não foi possível carregar o resumo do painel.',
+      )
+    } finally {
+      setSummaryLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (user?.role !== 'admin' && user?.role !== 'volunteer') {
       return
@@ -52,6 +71,12 @@ export default function Dashboard() {
         : '/dashboard/my-participation-requests'
     Promise.resolve().then(() => loadRequests(endpoint))
   }, [user?.role, loadRequests])
+
+  useEffect(() => {
+    if (user?.role === 'admin' || user?.role === 'volunteer') {
+      Promise.resolve().then(loadSummary)
+    }
+  }, [user?.role, loadSummary])
 
   const reviewRequest = async (requestId, status) => {
     setBusyRequest(requestId)
@@ -131,6 +156,48 @@ export default function Dashboard() {
               ? 'Revise as solicitações para participar dos eventos.'
               : 'Acompanhe o status das suas solicitações para participar dos eventos.'}
           </p>
+
+          {(user?.role === 'admin' || user?.role === 'volunteer') && (
+            <section
+              className="mb-6"
+              aria-label="Resumo geral do sistema"
+              aria-busy={summaryLoading}>
+              {summaryError ? (
+                <div
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                  role="alert">
+                  <span>{summaryError}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={loadSummary}>
+                    Tentar novamente
+                  </Button>
+                </div>
+              ) : summaryLoading ? (
+                <p className="rounded-lg border bg-white p-4 text-sm text-gray-600">
+                  Carregando resumo do sistema...
+                </p>
+              ) : summary ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <article className="rounded-lg border bg-white p-5 shadow-sm">
+                    <p className="text-sm text-gray-600">Ações futuras</p>
+                    <p className="mt-1 text-3xl font-bold text-emerald-800">
+                      {summary.activeCampaigns}
+                    </p>
+                  </article>
+                  <article className="rounded-lg border bg-white p-5 shadow-sm">
+                    <p className="text-sm text-gray-600">
+                      Voluntários cadastrados
+                    </p>
+                    <p className="mt-1 text-3xl font-bold text-emerald-800">
+                      {summary.totalVolunteersRegistered}
+                    </p>
+                  </article>
+                </div>
+              ) : null}
+            </section>
+          )}
 
           {user?.role !== 'admin' && user?.role !== 'volunteer' ? (
             <div className="rounded-lg border bg-white p-6 text-gray-700">
