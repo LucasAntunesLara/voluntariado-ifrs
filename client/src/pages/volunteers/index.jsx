@@ -1,6 +1,7 @@
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {
   CalendarDays,
+  Eye,
   GraduationCap,
   Mail,
   Pencil,
@@ -80,6 +81,11 @@ export default function Volunteers() {
   const [deletingVolunteerId, setDeletingVolunteerId] = useState(null)
   const [mutationError, setMutationError] = useState('')
   const [notice, setNotice] = useState('')
+  const [detailVolunteer, setDetailVolunteer] = useState(null)
+  const [volunteerDetails, setVolunteerDetails] = useState(null)
+  const [detailsLoading, setDetailsLoading] = useState(false)
+  const [detailsError, setDetailsError] = useState('')
+  const detailsRequestId = useRef(0)
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true)
@@ -161,6 +167,37 @@ export default function Volunteers() {
     setMutationError('')
     setNotice('')
     setFormOpen(true)
+  }
+
+  const openVolunteerDetails = async volunteer => {
+    const requestId = ++detailsRequestId.current
+    setDetailVolunteer(volunteer)
+    setVolunteerDetails(null)
+    setDetailsError('')
+    setDetailsLoading(true)
+
+    try {
+      const {data} = await api.get(`/volunteers/${volunteer.volunteerId}`)
+      if (detailsRequestId.current === requestId) {
+        setVolunteerDetails(data)
+      }
+    } catch (detailsLoadError) {
+      if (detailsRequestId.current === requestId) {
+        setDetailsError(
+          detailsLoadError?.response?.data?.error ||
+            'Não foi possível carregar os dados deste voluntário.',
+        )
+      }
+    } finally {
+      if (detailsRequestId.current === requestId) {
+        setDetailsLoading(false)
+      }
+    }
+  }
+
+  const closeVolunteerDetails = () => {
+    detailsRequestId.current += 1
+    setDetailVolunteer(null)
   }
 
   const closeForm = () => {
@@ -372,9 +409,9 @@ export default function Volunteers() {
                     <TableHead className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#63736a]">
                       Contato
                     </TableHead>
-                    <TableHead className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#63736a]">
+                    {/* <TableHead className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#63736a]">
                       Vínculo
-                    </TableHead>
+                    </TableHead> */}
                     <TableHead className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#63736a]">
                       Ações e inscrições
                     </TableHead>
@@ -408,6 +445,14 @@ export default function Volunteers() {
                             <p className="mt-0.5 text-xs text-[#829087]">
                               Voluntário
                             </p>
+                            <span className="mt-0.5 text-xs text-[#829087] inline-flex gap-1 items-center1">
+                              <GraduationCap
+                                className="mt-0.5 size-4 shrink-0 "
+                                aria-hidden="true"
+                              />
+                              {volunteer.courseOrAffiliation ||
+                                'Comunidade Externa'}
+                            </span>
                           </div>
                         </div>
                       </TableCell>
@@ -422,6 +467,7 @@ export default function Volunteers() {
                             />
                             {volunteer.email}
                           </a>
+
                           {volunteer.phone ? (
                             <a
                               className="inline-flex items-center gap-2 text-[#63736a] hover:text-emerald-700"
@@ -440,7 +486,7 @@ export default function Volunteers() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="px-5 py-4">
+                      {/* <TableCell className="px-5 py-4">
                         <span className="inline-flex min-w-40 items-start gap-2 text-sm leading-5 text-[#63736a]">
                           <GraduationCap
                             className="mt-0.5 size-4 shrink-0 text-rose-500"
@@ -449,7 +495,7 @@ export default function Volunteers() {
                           {volunteer.courseOrAffiliation ||
                             'Comunidade Externa'}
                         </span>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="px-5 py-4">
                         <div className="flex min-w-52 flex-col gap-2">
                           {volunteer.events?.length ? (
@@ -491,6 +537,17 @@ export default function Volunteers() {
                             type="button"
                             variant="outline"
                             size="icon"
+                            aria-label={`Ver detalhes de ${volunteer.name}`}
+                            title={`Ver detalhes de ${volunteer.name}`}
+                            disabled={!volunteer.volunteerId}
+                            onClick={() => openVolunteerDetails(volunteer)}
+                            className="border-[#d9e0d9] text-emerald-800">
+                            <Eye className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
                             aria-label={`Editar ${volunteer.name}`}
                             title={`Editar ${volunteer.name}`}
                             disabled={
@@ -514,8 +571,7 @@ export default function Volunteers() {
                               deletingVolunteerId !== null
                             }
                             onClick={() => deleteVolunteer(volunteer)}>
-                            {deletingVolunteerId ===
-                            volunteer.volunteerId ? (
+                            {deletingVolunteerId === volunteer.volunteerId ? (
                               <RefreshCw className="size-4 animate-spin" />
                             ) : (
                               <Trash2 className="size-4" />
@@ -683,6 +739,101 @@ export default function Volunteers() {
                 </Button>
               </div>
             </form>
+          </section>
+        </div>
+      )}
+      {detailVolunteer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="volunteer-details-title"
+            className="my-auto w-full max-w-lg rounded-lg border border-[#e8e9e1] bg-[#fffefa] p-6 shadow-xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id="volunteer-details-title"
+                  className="text-xl font-semibold text-emerald-950">
+                  Detalhes do voluntário
+                </h2>
+                <p className="mt-1 text-sm text-[#63736a]">
+                  Cadastro #{detailVolunteer.volunteerId}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeVolunteerDetails}>
+                Fechar
+              </Button>
+            </div>
+
+            {detailsError && (
+              <p
+                className="mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700"
+                role="alert">
+                {detailsError}
+              </p>
+            )}
+            {detailsLoading ? (
+              <p
+                className="py-6 text-center text-sm text-[#63736a]"
+                role="status">
+                Carregando dados do voluntário...
+              </p>
+            ) : volunteerDetails ? (
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    Nome
+                  </dt>
+                  <dd className="mt-1 font-medium text-emerald-950">
+                    {volunteerDetails.name}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    E-mail
+                  </dt>
+                  <dd className="mt-1 break-all text-emerald-950">
+                    {volunteerDetails.email}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    Telefone
+                  </dt>
+                  <dd className="mt-1 text-emerald-950">
+                    {volunteerDetails.phone || 'Não informado'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    Curso ou vínculo
+                  </dt>
+                  <dd className="mt-1 text-emerald-950">
+                    {volunteerDetails.course_or_affiliation ||
+                      'Comunidade Externa'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    Conta vinculada
+                  </dt>
+                  <dd className="mt-1 text-emerald-950">
+                    #{volunteerDetails.userId}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-[#829087]">
+                    Data de cadastro
+                  </dt>
+                  <dd className="mt-1 text-emerald-950">
+                    {formatDate(volunteerDetails.created_at)}
+                  </dd>
+                </div>
+              </dl>
+            ) : null}
           </section>
         </div>
       )}
