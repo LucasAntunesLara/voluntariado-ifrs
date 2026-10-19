@@ -8,6 +8,10 @@ Voluntários podem criar uma conta, consultar eventos e solicitar participação
 
 Este projeto foi desenvolvido para a **Prova P1** da disciplina de **Desenvolvimento de Aplicações Corporativas**, do curso superior de Análise e Desenvolvimento de Sistemas do IFRS Campus Bento Gonçalves.
 
+## 📌 Diagrama de Caso de Uso
+
+![Diagrama de caso de uso do Sistema de Gestão de Ações de Voluntariado IFRS](docs/use-case-diagram.png)
+
 ## 🛠️ Tecnologias Utilizadas
 
 - **Front-end:** React, Vite e JavaScript
@@ -75,13 +79,13 @@ O script [`service/src/database/schema.sql`](service/src/database/schema.sql) cr
 
 ### `volunteers`
 
-| Campo                   | Tipo                  | Descrição                                     |
-| ----------------------- | --------------------- | --------------------------------------------- |
-| `id`                    | INT                   | Identificador único, auto incremento          |
+| Campo                   | Tipo                  | Descrição                                            |
+| ----------------------- | --------------------- | ---------------------------------------------------- |
+| `id`                    | INT                   | Identificador único, auto incremento                 |
 | `user_id`               | INT                   | Vínculo obrigatório e único com uma conta em `users` |
-| `phone`                 | VARCHAR(20), opcional | Telefone de contato                           |
-| `course_or_affiliation` | VARCHAR(100)          | Curso ou vínculo; padrão `Comunidade Externa` |
-| `created_at`            | TIMESTAMP             | Data de criação                               |
+| `phone`                 | VARCHAR(20), opcional | Telefone de contato                                  |
+| `course_or_affiliation` | VARCHAR(100)          | Curso ou vínculo; padrão `Comunidade Externa`        |
+| `created_at`            | TIMESTAMP             | Data de criação                                      |
 
 Nome e e-mail são mantidos somente em `users`; o cadastro de voluntário guarda apenas os dados complementares e referencia sua conta por `user_id`.
 
