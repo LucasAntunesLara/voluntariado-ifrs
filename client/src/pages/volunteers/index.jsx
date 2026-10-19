@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useForm} from 'react-hook-form'
 import {
   CalendarDays,
   Eye,
@@ -76,7 +77,6 @@ export default function Volunteers() {
   const [error, setError] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [editingVolunteer, setEditingVolunteer] = useState(null)
-  const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [deletingVolunteerId, setDeletingVolunteerId] = useState(null)
   const [mutationError, setMutationError] = useState('')
@@ -86,6 +86,7 @@ export default function Volunteers() {
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailsError, setDetailsError] = useState('')
   const detailsRequestId = useRef(0)
+  const {register, handleSubmit, reset} = useForm({defaultValues: emptyForm})
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true)
@@ -149,7 +150,7 @@ export default function Volunteers() {
 
   const openCreateForm = () => {
     setEditingVolunteer(null)
-    setForm(emptyForm)
+    reset(emptyForm)
     setMutationError('')
     setNotice('')
     setFormOpen(true)
@@ -157,7 +158,7 @@ export default function Volunteers() {
 
   const openEditForm = volunteer => {
     setEditingVolunteer(volunteer)
-    setForm({
+    reset({
       name: volunteer.name || '',
       email: volunteer.email || '',
       phone: volunteer.phone || '',
@@ -207,13 +208,7 @@ export default function Volunteers() {
     setMutationError('')
   }
 
-  const updateField = event => {
-    const {name, value} = event.target
-    setForm(current => ({...current, [name]: value}))
-  }
-
-  const saveVolunteer = async event => {
-    event.preventDefault()
+  const saveVolunteer = async form => {
     setSaving(true)
     setMutationError('')
     setNotice('')
@@ -631,7 +626,7 @@ export default function Volunteers() {
               </p>
             )}
 
-            <form onSubmit={saveVolunteer} className="space-y-4">
+            <form onSubmit={handleSubmit(saveVolunteer)} className="space-y-4">
               <div className="space-y-2">
                 <label
                   htmlFor="volunteer-name"
@@ -640,12 +635,9 @@ export default function Volunteers() {
                 </label>
                 <Input
                   id="volunteer-name"
-                  name="name"
                   autoComplete="name"
                   maxLength={100}
-                  value={form.name}
-                  onChange={updateField}
-                  required
+                  {...register('name', {required: true, maxLength: 100})}
                 />
               </div>
               <div className="space-y-2">
@@ -656,13 +648,10 @@ export default function Volunteers() {
                 </label>
                 <Input
                   id="volunteer-email"
-                  name="email"
                   type="email"
                   autoComplete="email"
                   maxLength={100}
-                  value={form.email}
-                  onChange={updateField}
-                  required
+                  {...register('email', {required: true, maxLength: 100})}
                 />
               </div>
               <div className="space-y-2">
@@ -673,13 +662,10 @@ export default function Volunteers() {
                 </label>
                 <Input
                   id="volunteer-phone"
-                  name="phone"
                   type="tel"
                   autoComplete="tel"
                   maxLength={20}
-                  value={form.phone}
-                  onChange={updateField}
-                  required
+                  {...register('phone', {required: true, maxLength: 20})}
                 />
               </div>
               {!editingVolunteer && (
@@ -691,13 +677,10 @@ export default function Volunteers() {
                   </label>
                   <Input
                     id="volunteer-password"
-                    name="password"
                     type="password"
                     autoComplete="new-password"
                     minLength={8}
-                    value={form.password}
-                    onChange={updateField}
-                    required
+                    {...register('password', {required: true, minLength: 8})}
                   />
                   <p className="text-xs text-[#829087]">
                     A senha deve ter pelo menos 8 caracteres.
@@ -712,11 +695,9 @@ export default function Volunteers() {
                 </label>
                 <Input
                   id="volunteer-affiliation"
-                  name="courseOrAffiliation"
                   maxLength={100}
-                  value={form.courseOrAffiliation}
-                  onChange={updateField}
                   placeholder="Comunidade Externa"
+                  {...register('courseOrAffiliation', {maxLength: 100})}
                 />
               </div>
               <div className="flex justify-end gap-3 border-t border-[#e8e9e1] pt-4">

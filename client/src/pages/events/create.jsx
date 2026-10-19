@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useForm} from 'react-hook-form'
 import {Link, Navigate, useParams} from 'react-router-dom'
 import {ArrowLeft, CalendarPlus} from 'lucide-react'
 import Header from '@/components/layout/header'
@@ -20,15 +21,25 @@ function getLocalDateTimeValue(date) {
   return localDate.toISOString().slice(0, 16)
 }
 
+function isEventDateInPast(date) {
+  return new Date(date).getTime() <= Date.now()
+}
+
 export default function CreateEvent() {
   const {user} = useAuth()
   const {id} = useParams()
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    location: '',
-    date: '',
-    max_volunteers: '',
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    defaultValues: {
+      title: '',
+      description: '',
+      location: '',
+      date: '',
+      max_volunteers: '',
+    },
   })
   const [submitting, setSubmitting] = useState(false)
   const [loadedEventId, setLoadedEventId] = useState(null)
@@ -42,7 +53,7 @@ export default function CreateEvent() {
     const fetchEvent = async () => {
       try {
         const {data} = await api.get(`/events/${id}`)
-        setForm({
+        reset({
           title: data.title,
           description: data.description,
           location: data.location,
@@ -60,22 +71,16 @@ export default function CreateEvent() {
     }
 
     fetchEvent()
-  }, [id])
+  }, [id, reset])
 
   if (!user) return <Navigate to="/login" replace />
   if (user.role !== 'admin') return <Navigate to="/eventos" replace />
 
-  const updateField = event => {
-    const {name, value} = event.target
-    setForm(current => ({...current, [name]: value}))
-  }
-
-  const handleSubmit = async event => {
-    event.preventDefault()
+  const submitEvent = async form => {
     setError('')
     setSuccess(false)
 
-    if (!id && new Date(form.date).getTime() <= Date.now()) {
+    if (!id && isEventDateInPast(form.date)) {
       setError('A data do evento deve ser futura.')
       return
     }
@@ -94,13 +99,7 @@ export default function CreateEvent() {
       }
       setSuccess(true)
       if (!id) {
-        setForm({
-          title: '',
-          description: '',
-          location: '',
-          date: '',
-          max_volunteers: '',
-        })
+        reset()
       }
     } catch (requestError) {
       setError(
@@ -167,17 +166,14 @@ export default function CreateEvent() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit(submitEvent)} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="title">Nome do evento</Label>
                   <Input
                     id="title"
-                    name="title"
-                    value={form.title}
-                    onChange={updateField}
                     maxLength={150}
                     placeholder="Ex.: Mutirão de arrecadação"
-                    required
+                    {...register('title', {required: true, maxLength: 150})}
                   />
                 </div>
 
@@ -185,13 +181,10 @@ export default function CreateEvent() {
                   <Label htmlFor="description">Descrição</Label>
                   <textarea
                     id="description"
-                    name="description"
-                    value={form.description}
-                    onChange={updateField}
                     rows={4}
                     placeholder="Descreva a ação e como será a participação dos voluntários."
                     className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    required
+                    {...register('description', {required: true})}
                   />
                 </div>
 
@@ -199,12 +192,9 @@ export default function CreateEvent() {
                   <Label htmlFor="location">Local</Label>
                   <Input
                     id="location"
-                    name="location"
-                    value={form.location}
-                    onChange={updateField}
                     maxLength={150}
                     placeholder="Endereço ou local de encontro"
-                    required
+                    {...register('location', {required: true, maxLength: 150})}
                   />
                 </div>
 
@@ -213,12 +203,9 @@ export default function CreateEvent() {
                     <Label htmlFor="date">Data e horário</Label>
                     <Input
                       id="date"
-                      name="date"
                       type="datetime-local"
-                      value={form.date}
-                      onChange={updateField}
                       min={!id ? getLocalDateTimeValue(new Date()) : undefined}
-                      required
+                      {...register('date', {required: true})}
                     />
                   </div>
 
@@ -228,14 +215,15 @@ export default function CreateEvent() {
                     </Label>
                     <Input
                       id="max_volunteers"
-                      name="max_volunteers"
                       type="number"
                       min="1"
                       step="1"
-                      value={form.max_volunteers}
-                      onChange={updateField}
                       placeholder="Ex.: 20"
-                      required
+                      {...register('max_volunteers', {
+                        required: true,
+                        min: 1,
+                        valueAsNumber: true,
+                      })}
                     />
                   </div>
                 </div>
