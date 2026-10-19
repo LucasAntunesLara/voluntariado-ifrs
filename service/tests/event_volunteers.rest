@@ -1,6 +1,7 @@
 @baseUrl = http://localhost:3000
 @tokenAdmin = SEU_TOKEN_JWT_ADMIN_AQUI
 @userToken = SEU_TOKEN_JWT_USER_AQUI
+@registrationId = 1
 
 ### ==========================================================
 ### 1. AUTENTICAÇÃO (Auth)
@@ -201,4 +202,22 @@ Authorization: Bearer {{tokenAdmin}}
 
 ### Erro: Cancelar inscrição que não existe
 DELETE {{baseUrl}}/events/1/volunteers/9999
+Authorization: Bearer {{tokenAdmin}}
+
+
+### Use uma inscrição descartável existente no evento 1 para os cenários de remoção.
+
+### Remover inscrição pelo ID do vínculo sem token (401)
+DELETE {{baseUrl}}/events/1/registrations/{{registrationId}}
+
+### Remover inscrição pelo ID do vínculo com token de voluntário (403)
+DELETE {{baseUrl}}/events/1/registrations/{{registrationId}}
+Authorization: Bearer {{userToken}}
+
+### Remover inscrição pelo ID do vínculo (204)
+DELETE {{baseUrl}}/events/1/registrations/{{registrationId}}
+Authorization: Bearer {{tokenAdmin}}
+
+### Tentar remover novamente a inscrição excluída (404)
+DELETE {{baseUrl}}/events/1/registrations/{{registrationId}}
 Authorization: Bearer {{tokenAdmin}}

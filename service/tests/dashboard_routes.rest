@@ -1,0 +1,158 @@
+@baseUrl = http://localhost:3000
+@adminEmail = admin@ifrs.edu.br
+@adminPassword = 123456
+# Execute auth_routes.rest primeiro; o e-mail é atualizado naquele arquivo.
+@testVolunteerEmail = teste-voluntario-atualizado@ifrs.edu.br
+@testVolunteerPassword = senha-segura-123
+@testAdminEmail = teste-admin@ifrs.edu.br
+@eventId = 1
+
+### Login de administrador para obter token (200)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+@adminToken = {{loginAdmin.response.body.token}}
+
+### Login do voluntário criado em auth_routes.rest (200)
+# @name loginVolunteer
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testVolunteerEmail}}",
+  "password": "{{testVolunteerPassword}}"
+}
+
+###
+@volunteerToken = {{loginVolunteer.response.body.token}}
+
+### Acessar dashboard sem token (401)
+GET {{baseUrl}}/dashboard
+
+### Acessar dashboard com token inválido (403)
+GET {{baseUrl}}/dashboard
+Authorization: Bearer token-invalido
+
+### Acessar dashboard autenticado (200)
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{adminToken}}
+
+### Criar administrador sem token (401)
+POST {{baseUrl}}/dashboard/admins
+Content-Type: application/json
+
+{
+  "name": "Administrador de teste",
+  "email": "{{testAdminEmail}}",
+  "password": "senha-segura-123"
+}
+
+### Criar administrador com token de voluntário (403)
+POST {{baseUrl}}/dashboard/admins
+Authorization: Bearer {{volunteerToken}}
+Content-Type: application/json
+
+{
+  "name": "Administrador de teste",
+  "email": "{{testAdminEmail}}",
+  "password": "senha-segura-123"
+}
+
+### Criar administrador com campos obrigatórios ausentes (400)
+POST {{baseUrl}}/dashboard/admins
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Administrador de teste"
+}
+
+### Criar administrador autenticado como admin (201)
+POST {{baseUrl}}/dashboard/admins
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Administrador de teste",
+  "email": "{{testAdminEmail}}",
+  "password": "senha-segura-123"
+}
+
+### Criar administrador com e-mail já cadastrado (409)
+POST {{baseUrl}}/dashboard/admins
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Administrador de teste",
+  "email": "{{testAdminEmail}}",
+  "password": "senha-segura-123"
+}
+
+### Listar solicitações administrativas sem token (401)
+GET {{baseUrl}}/dashboard/participation-requests
+
+### Listar solicitações administrativas como voluntário (403)
+GET {{baseUrl}}/dashboard/participation-requests
+Authorization: Bearer {{volunteerToken}}
+
+### Listar solicitações do usuário sem token (401)
+GET {{baseUrl}}/dashboard/my-participation-requests
+
+### Listar solicitações do usuário autenticado (200)
+GET {{baseUrl}}/dashboard/my-participation-requests
+Authorization: Bearer {{volunteerToken}}
+
+### Listar todas as solicitações como admin (200)
+GET {{baseUrl}}/dashboard/participation-requests
+Authorization: Bearer {{adminToken}}
+
+### Criar uma solicitação pendente para testar a análise
+# @name createParticipation
+POST {{baseUrl}}/events/{{eventId}}/volunteers
+Authorization: Bearer {{volunteerToken}}
+
+###
+@registrationId = {{createParticipation.response.body.id}}
+
+### Analisar solicitação com decisão inválida (400)
+PATCH {{baseUrl}}/dashboard/participation-requests/{{registrationId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "invalid"
+}
+
+### Analisar solicitação sem token (401)
+PATCH {{baseUrl}}/dashboard/participation-requests/{{registrationId}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### Analisar solicitação com token de voluntário (403)
+PATCH {{baseUrl}}/dashboard/participation-requests/{{registrationId}}
+Authorization: Bearer {{volunteerToken}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### Aprovar solicitação pendente (200)
+PATCH {{baseUrl}}/dashboard/participation-requests/{{registrationId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}

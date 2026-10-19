@@ -1,0 +1,113 @@
+@baseUrl = http://localhost:3000
+# Use um e-mail ainda não cadastrado para o cenário de registro (201).
+@testVolunteerEmail = teste-voluntario@ifrs.edu.br
+@profileEmail = teste-voluntario-atualizado@ifrs.edu.br
+
+### Login de administrador (200)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br",
+  "password": "123456"
+}
+
+###
+@adminToken = {{loginAdmin.response.body.token}}
+
+### Login com senha incorreta (401)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br",
+  "password": "senhaerrada"
+}
+
+### Login sem senha (400)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ifrs.edu.br"
+}
+
+### Registro de voluntário sem campos obrigatórios (400)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Voluntário de teste"
+}
+
+### Registro de voluntário com e-mail inválido (400)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Voluntário de teste",
+  "email": "email-invalido",
+  "phone": "(54) 99999-0000",
+  "password": "senha-segura-123"
+}
+
+### Registro de voluntário (201); o token retornado será usado nas requisições seguintes
+# @name registerVolunteer
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Voluntário de teste",
+  "email": "{{testVolunteerEmail}}",
+  "phone": "(54) 99999-0000",
+  "password": "senha-segura-123"
+}
+
+###
+@volunteerToken = {{registerVolunteer.response.body.token}}
+
+### Registro repetido com o mesmo e-mail (409)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Voluntário de teste",
+  "email": "{{testVolunteerEmail}}",
+  "phone": "(54) 99999-0000",
+  "password": "senha-segura-123"
+}
+
+### Consultar perfil sem token (401)
+GET {{baseUrl}}/auth/me
+
+### Consultar perfil autenticado (200)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{volunteerToken}}
+
+### Atualizar perfil com dados inválidos (400)
+PATCH {{baseUrl}}/auth/me
+Authorization: Bearer {{volunteerToken}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "email-invalido"
+}
+
+### Atualizar perfil autenticado (200)
+PATCH {{baseUrl}}/auth/me
+Authorization: Bearer {{volunteerToken}}
+Content-Type: application/json
+
+{
+  "name": "Voluntário de teste atualizado",
+  "email": "{{profileEmail}}"
+}
+
+### Excluir perfil sem token (401)
+DELETE {{baseUrl}}/auth/me
+
+### Excluir a conta de voluntário de teste (204); execute por último
+DELETE {{baseUrl}}/auth/me
+Authorization: Bearer {{volunteerToken}}
